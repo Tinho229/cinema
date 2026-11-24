@@ -19,15 +19,22 @@ import { showcaseState } from "@/lib/showcaseState";
 const frag = /* glsl */ `
 uniform float uKx;      // arrondi du cadre (coins noirs)
 uniform float uKy;      // hauteur croissante vers les côtés
+uniform float uStart;   // |x| (0..1) à partir duquel la courbure démarre (0 = dès le centre)
 uniform float uCa;      // aberration chromatique
 uniform float uGrain;   // intensité du grain
 uniform float uTime;
 
+// profil de courbure : |x| tel quel (uStart = 0), ou plat jusqu'à uStart puis qui monte
+float prof(float a) {
+  return uStart > 0.0 ? smoothstep(uStart, 1.0, a) : a;
+}
+
 vec2 curve(vec2 uv) {
   vec2 c = uv - 0.5;
   vec2 n = c * 2.0;                         // -1 .. 1
+  float t = prof(abs(n.x));
   float fx = 1.0 + uKx * n.y * n.y;         // > 1 : compresse vers le centre
-  float fy = 1.0 - uKy * n.x * n.x;         // < 1 : agrandit vers les côtés
+  float fy = 1.0 - uKy * t * t;             // < 1 : agrandit vers les côtés
   return 0.5 + vec2(c.x * fx, c.y * fy);
 }
 
@@ -40,8 +47,9 @@ float hash(vec2 p) {
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
   vec2 base = curve(uv);
 
-  float cx = uv.x - 0.5;
-  vec2 d = vec2(cx * abs(cx), 0.0) * uCa * 4.0;
+  float nx = (uv.x - 0.5) * 2.0;
+  float tc = prof(abs(nx));
+  vec2 d = vec2(sign(nx) * tc * tc, 0.0) * uCa;
 
   vec4 r = texture2D(inputBuffer, base + d);
   vec4 g = texture2D(inputBuffer, base);
@@ -78,6 +86,8 @@ type Options = {
   ca?: number;
   /** intensité du grain */
   grain?: number;
+  /** seuil (0..1) à partir duquel les cartes se courbent ; 0 = dès le centre */
+  start?: number;
 };
 
 export class LensEffect extends Effect {
@@ -86,11 +96,12 @@ export class LensEffect extends Effect {
   private ca: number;
   private time = 0;
 
-  constructor({ kx = 0.025, ky = 0.12, ca = 0.012, grain = 0.1 }: Options = {}) {
+  constructor({ kx = 0.025, ky = 0.12, ca = 0.012, grain = 0.1, start = 0 }: Options = {}) {
     super("LensEffect", frag, {
       uniforms: new Map<string, Uniform>([
         ["uKx", new Uniform(0)],
         ["uKy", new Uniform(0)],
+        ["uStart", new Uniform(start)],
         ["uCa", new Uniform(0)],
         ["uGrain", new Uniform(grain)],
         ["uTime", new Uniform(0)],

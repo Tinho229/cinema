@@ -4,6 +4,7 @@ import { Suspense, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { showcaseState } from "@/lib/showcaseState";
+import { ACTIVE, COUNT } from "@/lib/showcaseLayout";
 
 const Showcase3D = dynamic(() => import("./Showcase3D").then((m) => ({ default: m.Showcase3D })), {
   ssr: false,
@@ -16,7 +17,6 @@ const projects = [
   { title: "Yantos", sub: "Site web" },
   { title: "Projet Quatre", sub: "Motion design" },
 ];
-const ACTIVE = 2;
 
 export function ShowcaseLayer() {
   const layer = useRef<HTMLDivElement>(null);
@@ -100,6 +100,7 @@ export function ShowcaseLayer() {
   return (
     <div
       ref={layer}
+      data-count={COUNT}
       className="showcase pointer-events-none absolute inset-0 z-[60] overflow-hidden text-[#f4f1ea]"
     >
       <header className="sc-header absolute inset-x-0 top-0 z-30 flex items-start justify-between px-[1.5vw] pt-[1.6vw] text-[12px] opacity-0">

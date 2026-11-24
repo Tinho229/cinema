@@ -188,9 +188,20 @@ body {
 .showcase {
   --sc-w: 26.9vw;
   --sc-h: calc(var(--sc-w) / 1.6);
+  --sc-shift: 0px; /* décalage du cadre et de la légende vers la carte active */
 }
 @media (max-width: 767px) {
   .showcase { --sc-w: 62vw; }
+}
+
+/* 6 cartes (data-count="6") : valeurs identiques à LAYOUT dans src/lib/showcaseLayout.ts.
+   La carte active n'est plus au centre : elle est à un demi-pas à gauche. */
+.showcase[data-count="6"] {
+  --sc-w: 18vw;
+  --sc-shift: calc(var(--sc-w) * 0.5425); /* = GAP / 2 */
+}
+@media (max-width: 767px) {
+  .showcase[data-count="6"] { --sc-w: 46vw; }
 }
 
 /* Scène plus grande que l'écran (+8 % de chaque côté) : la lentille a besoin
@@ -233,6 +244,8 @@ body {
 .sc-focus {
   position: absolute;
   inset: 0;
+  left: calc(var(--sc-shift) * -1);
+  right: var(--sc-shift);
   margin: auto;
   width: calc(var(--sc-w) * 1.035);
   height: calc(var(--sc-h) * 1.035);
@@ -251,7 +264,7 @@ body {
 }
 .sc-caption {
   position: absolute;
-  left: 0;
+  left: calc(var(--sc-shift) * -2); /* centre décalé de -shift, comme le cadre */
   right: 0;
   top: calc(50% + var(--sc-h) * 0.5175 + 50px);
   text-align: center;
