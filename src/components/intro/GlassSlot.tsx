@@ -14,7 +14,7 @@ import {
   type Texture,
 } from "three";
 import { showcaseState } from "@/lib/showcaseState";
-import { restingSlot } from "@/lib/showcaseLayout";
+import { edgeFade, restingSlot, slotPos } from "@/lib/showcaseLayout";
 import type { Note } from "@/lib/showcaseContent";
 import { drawGlassText, GLASS_TEXT_H, GLASS_TEXT_W } from "@/lib/glassText";
 
@@ -237,12 +237,14 @@ export function GlassSlot({ i, note, phase = 0 }: Props) {
     const mt = mat.current;
     if (!m || !mt) return;
 
-    const { spread, bg } = showcaseState;
-    m.visible = spread > 0.001;
+    const { spread, bg, step } = showcaseState;
+    // même position bouclée et même fondu que les images voisines
+    const pos = slotPos(i, step);
+    const fade = edgeFade(pos);
+    m.visible = spread > 0.001 && fade > 0.001;
     if (!m.visible) return;
 
-    // même place et même taille que les images voisines
-    const slot = restingSlot(i, size.width, spread);
+    const slot = restingSlot(pos, size.width, spread);
     const pad = slot.h * 0.14;
     m.position.x = slot.x;
     m.scale.set(slot.w + pad * 2, slot.h + pad * 2, 1);
@@ -259,10 +261,11 @@ export function GlassSlot({ i, note, phase = 0 }: Props) {
     u.uSize.value.set(slot.w, slot.h);
     u.uPad.value = pad;
     u.uBgAlpha.value = bg;
-    u.uOpacity.value = spread;
+    u.uOpacity.value = spread *  fade;
     // le texte apparaît un peu après le verre
     u.uTextAlpha.value = MathUtils.smoothstep(spread, 0.55, 1);
     u.uTime.value = reduced ? 0 : state.clock.elapsedTime + phase;
+    
   });
 
   return (

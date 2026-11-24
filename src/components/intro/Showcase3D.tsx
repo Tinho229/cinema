@@ -13,8 +13,17 @@ import {
   type Texture,
 } from "three";
 import { showcaseState } from "@/lib/showcaseState";
-import { ACTIVE, CARD_ASPECT, GAP, LAYOUT, SLOTS, restingSlot, slotOf } from "@/lib/showcaseLayout";
-import { NOTES, PROJECTS } from "@/lib/showcaseContent";
+import {
+  CARD_ASPECT,
+  GAP,
+  INTRO_ROW,
+  LAYOUT,
+  SLOTS,
+  edgeFade,
+  restingSlot,
+  slotPos,
+} from "@/lib/showcaseLayout";
+import { PROJECTS } from "@/lib/showcaseContent";
 import { LensEffect } from "./LensEffect";
 import { GlassSlot } from "./GlassSlot";
 
@@ -104,29 +113,37 @@ function Card({ i, src }: { i: number; src: string }) {
   const base = useTexture(src);
   const map = useMemo(() => coverTexture(base), [base]);
   const { size } = useThree();
+  const intro = i === INTRO_ROW;
 
   useFrame(() => {
     const m = mesh.current;
     const mt = mat.current;
     if (!m || !mt) return;
-    const { zoom, spread } = showcaseState;
+    const { zoom, spread, step } = showcaseState;
 
-    if (i === ACTIVE) {
+    // position de la carte dans la boucle, selon le défilement des paires
+    const pos = slotPos(i, step);
+    const fade = edgeFade(pos);
+    m.visible = fade > 0.001;
+    if (!m.visible) return;
+
+    if (intro) {
+      // image zoomée à l'ouverture : part du centre, glisse vers sa place
+      // (à step > 0, zoom = 1 et spread = 1 : même résultat que les autres)
       const w = size.width * (size.width < 768 ? LAYOUT.wMobile : LAYOUT.w);
       m.scale.set(w * zoom, (w / CARD_ASPECT) * zoom, 1);
-      mt.opacity = MathUtils.clamp((3.2 - zoom) * 1.5, 0, 1);
-      // part du centre de l'écran, glisse vers sa place pendant l'ouverture
-      m.position.x = slotOf(i) * w * GAP * spread;
+      m.position.x = pos * w * GAP * spread;
+      mt.opacity = MathUtils.clamp((3.2 - zoom) * 1.5, 0, 1) * fade;
     } else {
-      const slot = restingSlot(i, size.width, spread);
+      const slot = restingSlot(pos, size.width, spread);
       m.position.x = slot.x;
       m.scale.set(slot.w, slot.h, 1);
-      mt.opacity = spread;
+      mt.opacity = spread * fade;
     }
   });
 
   return (
-    <mesh ref={mesh} renderOrder={i === ACTIVE ? 2 : 1}>
+    <mesh ref={mesh} renderOrder={intro ? 2 : 1}>
       <planeGeometry args={[1, 1]} />
       <meshBasicMaterial
         ref={mat}
@@ -155,11 +172,16 @@ export function Showcase3D() {
     >
       <Background />
       {/* La rangée : images et verres selon SLOTS (showcaseLayout.ts) */}
-      {SLOTS.map((slot, i) =>
+            {SLOTS.map((slot, i) =>
         slot.kind === "image" ? (
           <Card key={`slot-${i}`} i={i} src={PROJECTS[slot.project].src} />
         ) : (
-          <GlassSlot key={`slot-${i}`} i={i} note={NOTES[slot.note]} phase={slot.note * 4.5} />
+          <GlassSlot
+            key={`slot-${i}`}
+            i={i}
+            note={PROJECTS[slot.project].note}
+            phase={slot.project * 4.5}
+          />
         )
       )}
       <EffectComposer multisampling={0}>

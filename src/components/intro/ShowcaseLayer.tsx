@@ -4,8 +4,8 @@ import { Suspense, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { showcaseState } from "@/lib/showcaseState";
-import { ACTIVE, COUNT, SLOTS } from "@/lib/showcaseLayout";
-import { NOTES, PROJECTS } from "@/lib/showcaseContent";
+import { COUNT, GAP, MAX_STEP, activeProject, frameX } from "@/lib/showcaseLayout";
+import { PROJECTS } from "@/lib/showcaseContent";
 
 const Showcase3D = dynamic(() => import("./Showcase3D").then((m) => ({ default: m.Showcase3D })), {
   ssr: false,
@@ -13,6 +13,8 @@ const Showcase3D = dynamic(() => import("./Showcase3D").then((m) => ({ default: 
 
 export function ShowcaseLayer() {
   const layer = useRef<HTMLDivElement>(null);
+  const capTitle = useRef<HTMLParagraphElement>(null);
+  const capSub = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
     const el = layer.current;
@@ -23,13 +25,29 @@ export function ShowcaseLayer() {
     let timer = 0;
 
     const build = () => {
+      showcaseState.step = 0;
+      let shown = activeProject(0);
+
+      // cadre + légende suivent l'image active pendant le défilement des paires
+      const sync = () => {
+        const step = showcaseState.step;
+        el.style.setProperty("--sc-shift", `calc(var(--sc-w) * ${-frameX(step) * GAP})`);
+        const p = activeProject(step);
+        if (p !== shown) {
+          shown = p;
+          if (capTitle.current) capTitle.current.textContent = PROJECTS[p].title;
+          if (capSub.current) capSub.current.textContent = PROJECTS[p].sub;
+        }
+      };
+
       ctx = gsap.context(() => {
         const tl = gsap.timeline({
           defaults: { ease: "power2.inOut" },
+          onUpdate: sync,
           scrollTrigger: {
             trigger: hero,
             start: "top top",
-            end: "+=250%",
+            end: "+=470%", // ouverture (~5 u.) + 2 étapes de paires
             scrub: 1,
             pin: hero,
             anticipatePin: 1,
@@ -44,11 +62,7 @@ export function ShowcaseLayer() {
           0
         );
 
-        tl.to(
-          ".title-end, .scroll-hint",
-          { opacity: 0, y: -24, filter: "blur(8px)", duration: 1.4 },
-          0
-        );
+        tl.to(".title-end, .scroll-hint", { opacity: 0, y: -24, filter: "blur(8px)", duration: 1.4 }, 0);
 
         // Scène WebGL : tout passe par showcaseState
         tl.fromTo(showcaseState, { bg: 0 }, { bg: 1, duration: 3, ease: "none" }, 0);
@@ -56,23 +70,20 @@ export function ShowcaseLayer() {
         tl.fromTo(showcaseState, { zoom: 3.2 }, { zoom: 1, duration: 3.2, ease: "power3.out" }, 0.5);
         tl.fromTo(showcaseState, { spread: 0 }, { spread: 1, duration: 3, ease: "power3.out" }, 1.6);
 
-        tl.fromTo(
-          ".sc-focus",
-          { opacity: 0, scale: 1.25 },
-          { opacity: 1, scale: 1, duration: 1, ease: "power3.out" },
-          4
-        );
-        tl.fromTo(
-          ".sc-caption",
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" },
-          4.2
-        );
+        tl.fromTo(".sc-focus", { opacity: 0, scale: 1.25 }, { opacity: 1, scale: 1, duration: 1, ease: "power3.out" }, 4);
+        tl.fromTo(".sc-caption", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }, 4.2);
         tl.fromTo(".sc-filters", { opacity: 0 }, { opacity: 1, duration: 0.8 }, 4.4);
         tl.fromTo(".sc-header", { opacity: 0 }, { opacity: 1, duration: 0.8 }, 4.4);
-        tl.to({}, { duration: 1.5 });
+
+        // Défilement des paires : pause, glissement d'une paire, pause…
+        tl.to({}, { duration: 1 });
+        for (let k = 1; k <= MAX_STEP; k++) {
+          tl.to(showcaseState, { step: k, duration: 2, ease: "power2.inOut" });
+          tl.to({}, { duration: k === MAX_STEP ? 1.5 : 1 });
+        }
       }, hero);
 
+      sync();
       ScrollTrigger.refresh();
     };
 
@@ -88,11 +99,8 @@ export function ShowcaseLayer() {
     };
   }, []);
 
-  // carte active : toujours une image (cf. ACTIVE dans showcaseLayout.ts)
-  const active = SLOTS[ACTIVE];
-  const center = PROJECTS[active.kind === "image" ? active.project : 0];
-  // textes des verres : dessinés dans un canvas, on les double pour les lecteurs d'écran
-  const notes = SLOTS.flatMap((slot) => (slot.kind === "glass" ? [NOTES[slot.note]] : []));
+  // légende initiale (step = 0) ; mise à jour ensuite par sync()
+  const first = PROJECTS[activeProject(0)];
 
   return (
     <div
@@ -141,19 +149,19 @@ export function ShowcaseLayer() {
       </nav>
 
       <div className="sc-caption z-30 opacity-0">
-        <p className="text-[15px] font-semibold">{center.title}</p>
-        <p className="mt-1 text-[12px] text-[#c8c4bc]/70">{center.sub}</p>
+        <p ref={capTitle} className="text-[15px] font-semibold">{first.title}</p>
+        <p ref={capSub} className="mt-1 text-[12px] text-[#c8c4bc]/70">{first.sub}</p>
       </div>
 
+      {/* textes des verres : dessinés dans un canvas, doublés ici pour les lecteurs d'écran */}
       <div className="sr-only">
-        {notes.map((n) => (
-          <section key={n.title}>
-            <h2>{n.title}</h2>
-            <p>{n.body}</p>
+        {PROJECTS.map((p) => (
+          <section key={p.title}>
+            <h2>{p.note.title}</h2>
+            <p>{p.note.body}</p>
           </section>
         ))}
       </div>
-
     </div>
   );
 }
