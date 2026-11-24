@@ -7,9 +7,10 @@ import { resetIntro, introState } from "@/lib/introState";
 
 import dynamic from "next/dynamic";
 
-const Scene3D = dynamic(() => import("./Scene3D").then((m) => m.Scene3D), {
-  ssr: false,
-});
+const Scene3D = dynamic(
+  () => import("./ClapScene").then((m) => ({ default: m.ClapScene })),
+  { ssr: false }
+);
 
 const COLS = 14;
 const ROWS = 9;
@@ -67,6 +68,7 @@ export function IntroHero() {
   const tiles = useMemo(() => buildTiles(), []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setWebgl(true);
   }, []);
 
