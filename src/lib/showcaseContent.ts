@@ -54,4 +54,16 @@ export const PROJECTS: readonly Project[] = [
       foot: "Scène 03 — Prise 01",
     },
   },
+
+    {
+    title: "Atelier Nord",
+    sub: "Direction artistique",
+    src: "/images/projects/p4.jpg",
+    note: {
+      eyebrow: "MONTAGE",
+      title: "Couper juste",
+      body: "Le rythme se décide au montage\u00a0: on garde ce qui respire, on retire ce qui explique.",
+      foot: "Scène 04 — Prise 01",
+    },
+  },
 ];

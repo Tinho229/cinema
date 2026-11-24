@@ -309,3 +309,36 @@ body {
   opacity: 0.6;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.09'/%3E%3C/svg%3E");
 }
+
+
+/* Cadre autour de l'image cadrée : position et taille posées en px par
+   ShowcaseLayer (variables --sc-f*), centré par marges négatives pour que
+   GSAP puisse animer scale/opacity librement. */
+.sc-focus {
+  position: absolute;
+  left: calc(50% + var(--sc-fx, 0px) - var(--sc-fw, 0px) / 2);
+  top: calc(50% + var(--sc-fy, 0px) - var(--sc-fh, 0px) / 2);
+  width: var(--sc-fw, 0px);
+  height: var(--sc-fh, 0px);
+  border: 1px solid rgb(255 255 255 / 0.4);
+  opacity: 0;
+}
+
+/* Filtres : au-dessus du bloc d'images, centrés sur lui */
+.sc-filters {
+  position: absolute;
+  left: calc(50% + var(--sc-bx, 0px) - var(--sc-bw, 0px) / 2);
+  width: var(--sc-bw, 0px);
+  bottom: var(--sc-fbot, 50%);
+  display: flex;
+  justify-content: center;
+}
+
+/* Légende : sous le bloc d'images, centrée sur lui */
+.sc-caption {
+  position: absolute;
+  left: calc(50% + var(--sc-bx, 0px) - var(--sc-bw, 0px) / 2);
+  width: var(--sc-bw, 0px);
+  top: var(--sc-ctop, 50%);
+  text-align: center;
+}

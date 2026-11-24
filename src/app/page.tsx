@@ -1,3 +1,4 @@
+import ContactFooter from "@/components/ContactFooter/ContactFooter";
 import { IntroHero } from "@/components/intro/IntroHero";
 import SmoothScroll from "@/components/SmoothScroll";
 
@@ -8,6 +9,7 @@ export default function Home() {
       <main>
         <IntroHero />
       </main>
+      <ContactFooter/>
     </>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import {
@@ -14,24 +14,24 @@ import {
   type Texture,
 } from "three";
 import { showcaseState } from "@/lib/showcaseState";
-import { edgeFade, restingSlot, slotPos } from "@/lib/showcaseLayout";
-import type { Note } from "@/lib/showcaseContent";
+import { N_PROJECTS, projectAt, slotRect, transition } from "@/lib/showcaseLayout";
+import { PROJECTS, type Note } from "@/lib/showcaseContent";
 import { drawGlassText, GLASS_TEXT_H, GLASS_TEXT_W } from "@/lib/glassText";
 
 /* ------------------------------------------------------------------
-   Verre dépoli (glassmorphism) dessiné DANS la scène WebGL.
+   Verre dépoli dessiné DANS la scène WebGL (voir la version précédente
+   pour le détail du rendu : fond réduit, saturation, arêtes, reflet…).
 
-   Un `backdrop-filter` CSS ne verrait pas la lentille : le verre resterait
-   plat et net au milieu d'un décor déformé. Ici le verre est une carte comme
-   les autres, donc la lentille le courbe avec le reste.
-
-   Comme WebGL n'a pas de backdrop-filter, le « flou de ce qui est derrière »
-   est reconstitué : le verre ne recouvre que le décor (les cartes sont côte
-   à côte, sans se chevaucher), on relit donc l'image du fond, très floutée.
-   Le shader ajoute ensuite ce que fait .glass-panel en CSS : saturation,
-   voile laiteux, reflet haut-gauche, arêtes lumineuses, reflet qui balaie,
-   ombre portée. Le texte vient d'un canvas (glassText.ts).
+   Nouveau : transition « verre brisé ».
+   Pendant la transition (uT : 0 -> 1), le verre est découpé en une grille
+   de GRID_X × GRID_Y petits carrés. Chaque carré, avec un retard aléatoire :
+     1. rétrécit en tournant un peu, son contenu zoome, puis disparaît (u 0 -> .5)
+     2. à mi-parcours, passe du texte actuel au texte suivant
+     3. se reconstruit (u .5 -> 1) jusqu'à reprendre sa place
 ------------------------------------------------------------------- */
+
+const GRID_X = 16;
+const GRID_Y = 10; // 16 / 10 = 1.6 = ratio d'une carte : carrés parfaits
 
 const VERT = /* glsl */ `
 varying vec2 vUv;
@@ -46,21 +46,28 @@ void main() {
 
 const FRAG = /* glsl */ `
 uniform sampler2D tBack;   // fond très réduit (donc flou)
-uniform sampler2D tText;   // texte du verre (canvas)
-uniform vec2  uTexel;      // taille d'un texel de tBack, en uv
-uniform vec2  uBgSize;     // taille du plan de fond, en px (cf. Background)
-uniform vec2  uSize;       // taille du verre, en px
-uniform float uPad;        // marge autour du verre pour l'ombre portée, en px
-uniform vec3  uTint;       // même teinte que le matériau du fond
+uniform sampler2D tTextA;  // texte actuel
+uniform sampler2D tTextB;  // texte suivant
+uniform vec2  uTexel;
+uniform vec2  uBgSize;
+uniform vec2  uSize;
+uniform vec2  uGrid;       // nombre de carrés (x, y)
+uniform float uPad;
+uniform vec3  uTint;
 uniform float uBgAlpha;
 uniform float uOpacity;
 uniform float uTextAlpha;
 uniform float uTime;
+uniform float uT;          // avancement de la transition 0 -> 1
 varying vec2 vUv;
 varying vec2 vWorld;
 
-// flou 3x3 pondéré par-dessus le fond déjà réduit : adoucit les « losanges »
-// de l'interpolation bilinéaire quand la petite texture est agrandie
+float hash21(vec2 p) {
+  p = fract(p * vec2(123.34, 456.21));
+  p += dot(p, p + 45.32);
+  return fract(p.x * p.y);
+}
+
 vec3 backdrop(vec2 uv) {
   vec3 s = vec3(0.0);
   for (int x = -1; x <= 1; x++) {
@@ -75,15 +82,55 @@ vec3 backdrop(vec2 uv) {
 void main() {
   // q : position en px depuis le coin bas-gauche du verre (négatif = marge d'ombre)
   vec2 q = vUv * (uSize + 2.0 * uPad) - uPad;
-  vec2 g = q / uSize;                       // uv du verre lui-même, 0..1
+  vec2 g0 = q / uSize;
   float dEdge = min(min(q.x, q.y), min(uSize.x - q.x, uSize.y - q.y));
   float inside = clamp(dEdge + 0.5, 0.0, 1.0);
 
-  // --- ombre portée (décalée vers le bas, comme le box-shadow du CSS)
+  // --- ombre portée
   vec2 qs = q + vec2(0.0, uPad * 0.45);
   vec2 ds = max(vec2(0.0), max(-qs, qs - uSize));
   float sh = 1.0 - smoothstep(0.0, uPad, length(ds));
   float shadow = sh * sh * 0.5;
+
+  // --- brisure : on remplace g (point du verre à dessiner) par le point
+  //     d'origine du carré en cours de rétrécissement
+  vec2  g = g0;
+  float useB = 0.0;      // 1 : texte suivant
+  float alphaT = 1.0;    // 0 : carré disparu
+  float crack = 0.0;     // éclat sur les arêtes des carrés
+  bool inGlass = g0.x >= 0.0 && g0.x <= 1.0 && g0.y >= 0.0 && g0.y <= 1.0;
+
+  if (inGlass && uT > 0.0 && uT < 1.0) {
+    vec2 cell = min(floor(g0 * uGrid), uGrid - 1.0);
+    vec2 ctr = (cell + 0.5) / uGrid;
+    vec2 hc = 0.5 / uGrid;
+
+    float r1 = hash21(cell + 1.7);
+    float r2 = hash21(cell + 9.1);
+
+    // retard aléatoire + légère vague en diagonale
+    float delay = r1 * 0.3 + 0.1 * ((cell.x / uGrid.x) + (1.0 - cell.y / uGrid.y)) * 0.5;
+    float u = clamp((uT - delay) / 0.6, 0.0, 1.0);
+
+    float b = u < 0.5 ? smoothstep(0.0, 0.5, u) : 1.0 - smoothstep(0.5, 1.0, u);
+    useB = step(0.5, u);
+
+    float s = max(1.0 - 0.95 * b, 0.05);          // le carré rétrécit
+    float ang = (r2 - 0.5) * 1.4 * b;             // et tourne un peu
+    mat2 R = mat2(cos(ang), -sin(ang), sin(ang), cos(ang));
+
+    vec2 lc = (g0 - ctr) / hc;                    // -1..1 dans le carré
+    vec2 lp = (R * lc) / s;                       // même point, repère du carré d'origine
+    float m = max(abs(lp.x), abs(lp.y));
+
+    alphaT = (1.0 - smoothstep(0.96, 1.0, m)) * (1.0 - smoothstep(0.65, 1.0, b));
+    crack = smoothstep(0.7, 1.0, m) * b;
+
+    float z = 1.0 + 0.7 * b;                      // zoom du contenu
+    g = ctr + (lp * hc) / z;
+  }
+  shadow *= inGlass ? alphaT : 1.0;
+  shadow *= 1.0 - 0.3 * sin(3.14159265 * uT);
 
   // --- ce qui est derrière : fond flou, légèrement réfracté
   vec2 c = g - 0.5;
@@ -91,49 +138,49 @@ void main() {
   vec2 bgUv = vWorld / uBgSize + 0.5 + shift * (uSize / uBgSize);
   vec3 col = backdrop(bgUv) * uTint * uBgAlpha;
 
-  // saturation + luminosité (≈ saturate(1.7) brightness(1.1) du verre CSS)
   float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
   col = mix(vec3(lum), col, 1.5) * 1.3;
-  col += vec3(0.95, 0.97, 1.0) * 0.03;      // voile laiteux
+  col += vec3(0.95, 0.97, 1.0) * 0.03;
 
-  // --- profondeur : reflet haut-gauche, teinte froide et ombre bas-droite
-  float diag = 0.5 * (g.x + (1.0 - g.y));   // 0 en haut à gauche, 1 en bas à droite
+  // --- profondeur
+  float diag = 0.5 * (g.x + (1.0 - g.y));
   col += 0.05 * (1.0 - smoothstep(0.0, 0.55, length(vec2(g.x, 1.0 - g.y) * vec2(0.9, 1.3))));
   col += vec3(0.67, 0.8, 1.0) * 0.03 * smoothstep(0.45, 1.0, diag);
   col *= 1.0 - 0.28 * smoothstep(0.35, 1.0, diag);
 
-  // --- arêtes (épaisseur du verre) : claires en haut/gauche, sombres en bas/droite
+  // --- arêtes du verre (calculées sur la vraie position)
   float eTop   = 1.0 - smoothstep(0.0, 1.4, uSize.y - q.y);
   float eLeft  = 1.0 - smoothstep(0.0, 1.4, q.x);
   float eBot   = 1.0 - smoothstep(0.0, 1.4, q.y);
   float eRight = 1.0 - smoothstep(0.0, 1.4, uSize.x - q.x);
   col += vec3(1.0) * (eTop * 0.25 + eLeft * 0.12);
   col *= 1.0 - (eBot * 0.45 + eRight * 0.2);
-  // liseré spéculaire : brillant aux deux coins opposés (comme le ::before du CSS)
   float rim = max(max(eTop, eLeft), max(eBot, eRight));
   float spec = 0.9 * (1.0 - smoothstep(0.0, 0.28, diag)) + 0.55 * smoothstep(0.6, 1.0, diag) + 0.06;
   col += vec3(1.0) * rim * spec * 0.4;
-  // lueur interne le long des bords
   col += 0.025 * (1.0 - smoothstep(0.0, 16.0, dEdge));
 
-  // --- reflet diagonal qui balaie la surface (9 s, avec pause)
+  // --- reflet diagonal qui balaie la surface
   float ph = fract(uTime / 9.0);
   float sc = mix(1.6, -0.45, smoothstep(0.15, 0.6, ph));
-  float s = g.x * 0.85 + (1.0 - g.y) * 0.35;
-  float d1 = (s - sc) / 0.13;
-  float d2 = (s - sc - 0.1) / 0.3;
+  float sw = g.x * 0.85 + (1.0 - g.y) * 0.35;
+  float d1 = (sw - sc) / 0.13;
+  float d2 = (sw - sc - 0.1) / 0.3;
   col += vec3(1.0) * (exp(-d1 * d1) * 0.09 + exp(-d2 * d2) * 0.02);
 
-  // --- texte
-  vec4 t = texture2D(tText, g);
+  // --- arêtes des éclats : lueur claire pendant la brisure
+  col += vec3(0.85, 0.92, 1.0) * crack * 0.45;
+
+  // --- texte (actuel ou suivant, carré par carré)
+  vec4 t = mix(texture2D(tTextA, g), texture2D(tTextB, g), useB);
   col = mix(col, t.rgb, t.a * uTextAlpha);
 
-  gl_FragColor = vec4(mix(vec3(0.0), col, inside), mix(shadow, 1.0, inside) * uOpacity);
+  float body = inside * alphaT;
+  gl_FragColor = vec4(mix(vec3(0.0), col, body), mix(shadow, 1.0, body) * uOpacity);
 }
 `;
 
-/* Fond réduit une seule fois pour tous les verres (le plus gros travail).
-   Réduction par moitiés successives : un seul saut 16× crénèlerait l'image. */
+/* Fond réduit une seule fois pour tous les verres. */
 const BACKDROP_W = 160;
 const backdrops = new WeakMap<Texture, CanvasTexture>();
 
@@ -161,50 +208,50 @@ function getBackdrop(hero: Texture): CanvasTexture {
   return t;
 }
 
-/* Redessine le canvas du texte et prévient three de renvoyer la texture au GPU. */
-function paintGlassText(tex: CanvasTexture, note: Note) {
-  drawGlassText(tex.image as HTMLCanvasElement, note);
-  tex.needsUpdate = true;
+/* Une texture de texte par note, partagée entre tous les verres :
+   chaque verre en affiche successivement plusieurs. Redessinée une fois
+   les polices chargées (la mesure des lignes en dépend). */
+const noteTextures = new Map<Note, CanvasTexture>();
+
+function getNoteTexture(note: Note): CanvasTexture {
+  const hit = noteTextures.get(note);
+  if (hit) return hit;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = GLASS_TEXT_W;
+  canvas.height = GLASS_TEXT_H;
+  const t = new CanvasTexture(canvas);
+  t.colorSpace = SRGBColorSpace;
+  t.anisotropy = 4;
+
+  const paint = () => {
+    drawGlassText(canvas, note);
+    t.needsUpdate = true;
+  };
+  paint();
+  document.fonts?.ready.then(paint);
+
+  noteTextures.set(note, t);
+  return t;
 }
 
 type Props = {
   /** emplacement dans la rangée (voir SLOTS) */
   i: number;
-  note: Note;
-  /** décalage du reflet qui balaie, en secondes, pour que deux verres ne brillent pas ensemble */
+  /** projet de base de l'emplacement : le défilement le fait tourner */
+  project: number;
+  /** décalage du reflet qui balaie, en secondes */
   phase?: number;
 };
 
-export function GlassSlot({ i, note, phase = 0 }: Props) {
+export function GlassSlot({ i, project, phase = 0 }: Props) {
   const mesh = useRef<Mesh>(null);
   const mat = useRef<ShaderMaterial>(null);
-  const hero = useTexture("/images/hero.jpg"); // déjà en cache : partagé avec Background
+  const hero = useTexture("/images/hero.jpg");
   const { size } = useThree();
 
   const backdrop = useMemo(() => getBackdrop(hero), [hero]);
-
-  const text = useMemo(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = GLASS_TEXT_W;
-    canvas.height = GLASS_TEXT_H;
-    const t = new CanvasTexture(canvas);
-    t.colorSpace = SRGBColorSpace;
-    t.anisotropy = 4;
-    return t;
-  }, []);
-
-  // (re)dessine le texte : au montage, quand il change, et une fois les polices
-  // chargées (la mesure des lignes en dépend)
-  useEffect(() => {
-    let alive = true;
-    paintGlassText(text, note);
-    document.fonts?.ready.then(() => alive && paintGlassText(text, note));
-    return () => {
-      alive = false;
-    };
-  }, [text, note]);
-
-  useEffect(() => () => text.dispose(), [text]);
+  const texts = useMemo(() => PROJECTS.map((p) => getNoteTexture(p.note)), []);
 
   const reduced = useMemo(
     () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -218,19 +265,23 @@ export function GlassSlot({ i, note, phase = 0 }: Props) {
       fragmentShader: FRAG,
       uniforms: {
         tBack: { value: backdrop },
-        tText: { value: text },
+        tTextA: { value: texts[project % N_PROJECTS] },
+        tTextB: { value: texts[project % N_PROJECTS] },
         uTexel: { value: new Vector2(1 / b.width, 1 / b.height) },
         uBgSize: { value: new Vector2(1, 1) },
         uSize: { value: new Vector2(1, 1) },
+        uGrid: { value: new Vector2(GRID_X, GRID_Y) },
         uPad: { value: 0 },
         uTint: { value: new Color("#777777") }, // = color du matériau de Background
         uBgAlpha: { value: 0 },
         uOpacity: { value: 0 },
         uTextAlpha: { value: 0 },
         uTime: { value: 0 },
+        uT: { value: 0 },
       },
     };
-  }, [backdrop, text]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [backdrop, texts]);
 
   useFrame((state) => {
     const m = mesh.current;
@@ -238,34 +289,33 @@ export function GlassSlot({ i, note, phase = 0 }: Props) {
     if (!m || !mt) return;
 
     const { spread, bg, step } = showcaseState;
-    // même position bouclée et même fondu que les images voisines
-    const pos = slotPos(i, step);
-    const fade = edgeFade(pos);
-    m.visible = spread > 0.001 && fade > 0.001;
+    m.visible = spread > 0.001;
     if (!m.visible) return;
 
-    const slot = restingSlot(pos, size.width, spread);
+    const slot = slotRect("glass", i, size.width, spread);
     const pad = slot.h * 0.14;
-    m.position.x = slot.x;
+    m.position.set(slot.x, slot.y, 0);
     m.scale.set(slot.w + pad * 2, slot.h + pad * 2, 1);
-
-    // plan de fond « cover » : mêmes formules que Background (Showcase3D)
     const img = hero.image as HTMLImageElement;
     const imgRatio = img.width / img.height;
     const viewRatio = size.width / size.height;
     const bw = (viewRatio > imgRatio ? size.width : size.height * imgRatio) * 1.02;
     const bh = (viewRatio > imgRatio ? size.width / imgRatio : size.height) * 1.02;
 
+    // textes : actuel (A) et suivant (B)
+    const { cur, t } = transition(step);
+
     const u = mt.uniforms;
+    u.tTextA.value = texts[projectAt(project, cur, 0)];
+    u.tTextB.value = texts[projectAt(project, cur, 1)];
+    u.uT.value = t;
     u.uBgSize.value.set(bw, bh);
     u.uSize.value.set(slot.w, slot.h);
     u.uPad.value = pad;
     u.uBgAlpha.value = bg;
-    u.uOpacity.value = spread *  fade;
-    // le texte apparaît un peu après le verre
+    u.uOpacity.value = spread;
     u.uTextAlpha.value = MathUtils.smoothstep(spread, 0.55, 1);
     u.uTime.value = reduced ? 0 : state.clock.elapsedTime + phase;
-    
   });
 
   return (
@@ -283,4 +333,4 @@ export function GlassSlot({ i, note, phase = 0 }: Props) {
       />
     </mesh>
   );
-}
+}""

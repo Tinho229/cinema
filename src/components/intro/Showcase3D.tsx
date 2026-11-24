@@ -8,50 +8,42 @@ import {
   CanvasTexture,
   MathUtils,
   SRGBColorSpace,
+  Vector4,
   type Mesh,
   type MeshBasicMaterial,
-  type Texture,
+  type ShaderMaterial,
 } from "three";
 import { showcaseState } from "@/lib/showcaseState";
 import {
   CARD_ASPECT,
-  GAP,
-  INTRO_ROW,
+  FOCUS,
   LAYOUT,
-  SLOTS,
-  edgeFade,
-  restingSlot,
-  slotPos,
+  N_PROJECTS,
+  projectAt,
+  slotRect,
+  transition,
 } from "@/lib/showcaseLayout";
 import { PROJECTS } from "@/lib/showcaseContent";
 import { LensEffect } from "./LensEffect";
 import { GlassSlot } from "./GlassSlot";
 
-/* Part de l'image source rognée en haut / en bas (0 → 1). Les captures actuelles
-   ont une bande noire (≈ 15 px en haut, 4 px en bas sur 626) : l'ancienne version
-   CSS la masquait par un scale(1.03), perdu au passage en WebGL.
+/* Part de l'image source rognée en haut / en bas (0 → 1).
    Mets { top: 0, bottom: 0 } avec des images propres. */
 const TRIM = { top: 0.026, bottom: 0.008 };
 
-/* Ajuste une image à la carte comme `object-fit: cover`
-   (sans ça, l'image 1080×626 est écrasée dans un rectangle d'autre ratio),
-   après avoir rogné TRIM. v = 0 est le bas de l'image (flipY). */
-function coverTexture(base: Texture): Texture {
-  const t = base.clone();
-  const img = base.image as { width: number; height: number };
-  const keep = 1 - TRIM.top - TRIM.bottom; // part de hauteur conservée
+/* Équivalent de `object-fit: cover` (après rognage TRIM), exprimé en
+   (repeat.x, repeat.y, offset.x, offset.y). Le shader applique
+   uv * repeat + offset lui-même. v = 0 est le bas de l'image (flipY). */
+function coverTransform(image: unknown): [number, number, number, number] {
+  const img = image as { width: number; height: number };
+  const keep = 1 - TRIM.top - TRIM.bottom;
   const imgAspect = img.width / (img.height * keep);
   if (imgAspect > CARD_ASPECT) {
-    t.repeat.set(CARD_ASPECT / imgAspect, keep);
-    t.offset.set((1 - t.repeat.x) / 2, TRIM.bottom);
-  } else {
-    t.repeat.set(1, (keep * imgAspect) / CARD_ASPECT);
-    t.offset.set(0, TRIM.bottom + (keep - t.repeat.y) / 2);
+    const rx = CARD_ASPECT / imgAspect;
+    return [rx, keep, (1 - rx) / 2, TRIM.bottom];
   }
-  t.colorSpace = SRGBColorSpace;
-  t.anisotropy = 4;
-  t.needsUpdate = true;
-  return t;
+  const ry = (keep * imgAspect) / CARD_ASPECT;
+  return [1, ry, 0, TRIM.bottom + (keep - ry) / 2];
 }
 
 /* Fond : même image que le hero, floutée, dessinée DANS la scène
@@ -69,7 +61,7 @@ function Background() {
     c.height = Math.max(1, Math.round(img.height / 8));
     const ctx = c.getContext("2d");
     if (ctx) {
-      ctx.filter = "blur(2px)"; // ≈ 16 px à pleine taille (ignoré si non supporté : le /8 adoucit déjà)
+      ctx.filter = "blur(2px)";
       ctx.drawImage(img, 0, 0, c.width, c.height);
     }
     const t = new CanvasTexture(c);
@@ -84,7 +76,6 @@ function Background() {
     const img = tex.image as HTMLImageElement;
     const imgRatio = img.width / img.height;
     const viewRatio = size.width / size.height;
-    // équivalent object-fit: cover
     const w = viewRatio > imgRatio ? size.width : size.height * imgRatio;
     const h = viewRatio > imgRatio ? size.width / imgRatio : size.height;
     m.scale.set(w * 1.02, h * 1.02, 1);
@@ -107,13 +98,93 @@ function Background() {
   );
 }
 
-function Card({ i, src }: { i: number; src: string }) {
+/* Image qui change PAR COLONNES : un front horizontal balaie chaque colonne,
+   colonnes paires du bas vers le haut, impaires du haut vers le bas. */
+const COLS_FX = 8;
+
+const CARD_VERT = /* glsl */ `
+varying vec2 vUv;
+void main() {
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const CARD_FRAG = /* glsl */ `
+uniform sampler2D tA;
+uniform sampler2D tB;
+uniform vec4  uTa;
+uniform vec4  uTb;
+uniform float uT;
+uniform float uOpacity;
+uniform float uCols;
+varying vec2 vUv;
+
+float hash(float n) { return fract(sin(n * 91.3458) * 47453.5453); }
+
+void main() {
+  float c = floor(vUv.x * uCols);
+  bool up = mod(c, 2.0) < 0.5;
+
+  float delay = hash(c + 1.0) * 0.35;
+  float p = clamp((uT - delay) / (1.0 - 0.35), 0.0, 1.0);
+  p = p * p * (3.0 - 2.0 * p);
+
+  float y = up ? vUv.y : 1.0 - vUv.y;
+  float edge = 0.05;
+  float f = p * (1.0 + edge);
+  float m = 1.0 - smoothstep(f - edge, f, y);
+
+  vec3 a = texture2D(tA, vUv * uTa.xy + uTa.zw).rgb;
+  vec3 b = texture2D(tB, vUv * uTb.xy + uTb.zw).rgb;
+  vec3 col = mix(a, b, m);
+
+  float act = sin(3.14159265 * p);
+  float d = (y - (f - edge * 0.5)) / (edge * 0.6);
+  col += vec3(0.9, 0.92, 1.0) * exp(-d * d) * 0.28 * act;
+  float fx = fract(vUv.x * uCols);
+  float seam = 1.0 - smoothstep(0.0, 0.025, min(fx, 1.0 - fx));
+  col *= 1.0 - 0.55 * seam * act;
+
+  gl_FragColor = vec4(col, uOpacity);
+}
+`;
+
+function Card({ i }: { i: number }) {
   const mesh = useRef<Mesh>(null);
-  const mat = useRef<MeshBasicMaterial>(null);
-  const base = useTexture(src);
-  const map = useMemo(() => coverTexture(base), [base]);
+  const mat = useRef<ShaderMaterial>(null);
+  const textures = useTexture(PROJECTS.map((p) => p.src));
   const { size } = useThree();
-  const intro = i === INTRO_ROW;
+  const intro = i === FOCUS;
+
+  const xf = useMemo(
+    () =>
+      textures.map((t) => {
+        t.colorSpace = SRGBColorSpace;
+        t.anisotropy = 4;
+        t.needsUpdate = true;
+        return coverTransform(t.image);
+      }),
+    [textures]
+  );
+
+  const args = useMemo(
+    () => ({
+      vertexShader: CARD_VERT,
+      fragmentShader: CARD_FRAG,
+      uniforms: {
+        tA: { value: textures[i % N_PROJECTS] },
+        tB: { value: textures[i % N_PROJECTS] },
+        uTa: { value: new Vector4(1, 1, 0, 0) },
+        uTb: { value: new Vector4(1, 1, 0, 0) },
+        uT: { value: 0 },
+        uOpacity: { value: 0 },
+        uCols: { value: COLS_FX },
+      },
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [textures]
+  );
 
   useFrame(() => {
     const m = mesh.current;
@@ -121,33 +192,37 @@ function Card({ i, src }: { i: number; src: string }) {
     if (!m || !mt) return;
     const { zoom, spread, step } = showcaseState;
 
-    // position de la carte dans la boucle, selon le défilement des paires
-    const pos = slotPos(i, step);
-    const fade = edgeFade(pos);
-    m.visible = fade > 0.001;
-    if (!m.visible) return;
+    const { cur, t } = transition(step);
+    const a = projectAt(i, cur, 0);
+    const b = projectAt(i, cur, 1);
+    const u = mt.uniforms;
+    u.tA.value = textures[a];
+    u.tB.value = textures[b];
+    u.uTa.value.set(...xf[a]);
+    u.uTb.value.set(...xf[b]);
+    u.uT.value = t;
 
     if (intro) {
       // image zoomée à l'ouverture : part du centre, glisse vers sa place
-      // (à step > 0, zoom = 1 et spread = 1 : même résultat que les autres)
-      const w = size.width * (size.width < 768 ? LAYOUT.wMobile : LAYOUT.w);
-      m.scale.set(w * zoom, (w / CARD_ASPECT) * zoom, 1);
-      m.position.x = pos * w * GAP * spread;
-      mt.opacity = MathUtils.clamp((3.2 - zoom) * 1.5, 0, 1) * fade;
+      const full = slotRect("image", i, size.width, 1);
+      m.scale.set(full.w * zoom, full.h * zoom, 1);
+      m.position.set(full.x * spread, full.y * spread, 0);
+      u.uOpacity.value = MathUtils.clamp((3.2 - zoom) * 1.5, 0, 1);
     } else {
-      const slot = restingSlot(pos, size.width, spread);
-      m.position.x = slot.x;
-      m.scale.set(slot.w, slot.h, 1);
-      mt.opacity = spread * fade;
+      const r = slotRect("image", i, size.width, spread);
+      m.position.set(r.x, r.y, 0);
+      m.scale.set(r.w, r.h, 1);
+      u.uOpacity.value = spread;
     }
+    m.visible = u.uOpacity.value > 0.001;
   });
 
   return (
     <mesh ref={mesh} renderOrder={intro ? 2 : 1}>
       <planeGeometry args={[1, 1]} />
-      <meshBasicMaterial
+      <shaderMaterial
         ref={mat}
-        map={map}
+        args={[args]}
         transparent
         depthTest={false}
         depthWrite={false}
@@ -171,19 +246,13 @@ export function Showcase3D() {
       style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
     >
       <Background />
-      {/* La rangée : images et verres selon SLOTS (showcaseLayout.ts) */}
-            {SLOTS.map((slot, i) =>
-        slot.kind === "image" ? (
-          <Card key={`slot-${i}`} i={i} src={PROJECTS[slot.project].src} />
-        ) : (
-          <GlassSlot
-            key={`slot-${i}`}
-            i={i}
-            note={PROJECTS[slot.project].note}
-            phase={slot.project * 4.5}
-          />
-        )
-      )}
+      {/* Bloc de gauche : les images. Bloc de droite : les verres. */}
+      {PROJECTS.map((_, i) => (
+        <Card key={`img-${i}`} i={i} />
+      ))}
+      {PROJECTS.map((_, i) => (
+        <GlassSlot key={`glass-${i}`} i={i} project={i} phase={i * 4.5} />
+      ))}
       <EffectComposer multisampling={0}>
         <primitive object={lens} />
       </EffectComposer>

@@ -4,12 +4,16 @@ import { Suspense, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { showcaseState } from "@/lib/showcaseState";
-import { COUNT, GAP, MAX_STEP, activeProject, frameX } from "@/lib/showcaseLayout";
+import { FOCUS, MAX_STEP, activeProject, blockRect, slotRect } from "@/lib/showcaseLayout";
 import { PROJECTS } from "@/lib/showcaseContent";
 
 const Showcase3D = dynamic(() => import("./Showcase3D").then((m) => ({ default: m.Showcase3D })), {
   ssr: false,
 });
+
+/* Défilement par unité de timeline (en % de la hauteur d'écran). Plus d'histoires
+   = plus de scroll, sans que chaque transition soit raccourcie. */
+const SCROLL_PER_UNIT = 37;
 
 export function ShowcaseLayer() {
   const layer = useRef<HTMLDivElement>(null);
@@ -21,18 +25,36 @@ export function ShowcaseLayer() {
     const hero = el?.closest("section") as HTMLElement | null;
     if (!el || !hero) return;
 
+    // cadre, légende et filtres suivent la disposition (px, calculés depuis la largeur)
+    const place = () => {
+      const W = el.clientWidth;
+      const H = el.clientHeight;
+      const fr = slotRect("image", FOCUS, W);
+      const bl = blockRect("image", W);
+      const set = (k: string, v: number) => el.style.setProperty(k, `${v}px`);
+      set("--sc-fx", fr.x);
+      set("--sc-fy", -fr.y);
+      set("--sc-fw", fr.w * 1.035);
+      set("--sc-fh", fr.h * 1.035);
+      set("--sc-bx", bl.x);
+      set("--sc-bw", bl.w);
+      set("--sc-ctop", H / 2 - bl.y + bl.h / 2 + 22); // légende sous le bloc d'images
+      set("--sc-fbot", H / 2 + bl.y + bl.h / 2 + 22); // filtres au-dessus
+    };
+    place();
+    window.addEventListener("resize", place);
+
     let ctx: gsap.Context | undefined;
     let timer = 0;
+    let units = 12; // remplacé par la durée réelle de la timeline
 
     const build = () => {
       showcaseState.step = 0;
       let shown = activeProject(0);
 
-      // cadre + légende suivent l'image active pendant le défilement des paires
+      // la légende suit le projet de l'image cadrée
       const sync = () => {
-        const step = showcaseState.step;
-        el.style.setProperty("--sc-shift", `calc(var(--sc-w) * ${-frameX(step) * GAP})`);
-        const p = activeProject(step);
+        const p = activeProject(showcaseState.step);
         if (p !== shown) {
           shown = p;
           if (capTitle.current) capTitle.current.textContent = PROJECTS[p].title;
@@ -47,7 +69,7 @@ export function ShowcaseLayer() {
           scrollTrigger: {
             trigger: hero,
             start: "top top",
-            end: "+=470%", // ouverture (~5 u.) + 2 étapes de paires
+            end: () => `+=${Math.round(units * SCROLL_PER_UNIT)}%`,
             scrub: 1,
             pin: hero,
             anticipatePin: 1,
@@ -75,12 +97,14 @@ export function ShowcaseLayer() {
         tl.fromTo(".sc-filters", { opacity: 0 }, { opacity: 1, duration: 0.8 }, 4.4);
         tl.fromTo(".sc-header", { opacity: 0 }, { opacity: 1, duration: 0.8 }, 4.4);
 
-        // Défilement des paires : pause, glissement d'une paire, pause…
+        // Une transition par histoire : pause, brisure / changement, pause…
         tl.to({}, { duration: 1 });
         for (let k = 1; k <= MAX_STEP; k++) {
           tl.to(showcaseState, { step: k, duration: 2, ease: "power2.inOut" });
           tl.to({}, { duration: k === MAX_STEP ? 1.5 : 1 });
         }
+
+        units = tl.duration();
       }, hero);
 
       sync();
@@ -95,27 +119,20 @@ export function ShowcaseLayer() {
     return () => {
       window.clearTimeout(timer);
       window.removeEventListener("intro:done", onDone);
+      window.removeEventListener("resize", place);
       ctx?.revert();
     };
   }, []);
 
-  // légende initiale (step = 0) ; mise à jour ensuite par sync()
+  // légende initiale ; mise à jour ensuite par sync()
   const first = PROJECTS[activeProject(0)];
 
   return (
     <div
       ref={layer}
-      data-count={COUNT}
       className="showcase pointer-events-none absolute inset-0 z-[60] overflow-hidden text-[#f4f1ea]"
     >
-      <header className="sc-header absolute inset-x-0 top-0 z-30 flex items-start justify-between px-[1.5vw] pt-[1.6vw] text-[12px] opacity-0">
-        <span className="font-medium">Ligne de fuite</span>
-        <nav className="flex gap-2">
-          <span className="font-medium">Portfolio,</span>
-          <span className="opacity-60">About,</span>
-          <span className="opacity-60">Contacts</span>
-        </nav>
-      </header>
+      
 
       <div className="sc-stage sc-stage--gl">
         <Suspense fallback={null}>
@@ -130,23 +147,6 @@ export function ShowcaseLayer() {
         </div>
       </div>
 
-      <nav className="sc-filters z-30 items-center gap-4 text-[11px] opacity-0">
-        <span className="opacity-60">All</span>
-        <span className="opacity-60">Web</span>
-        <span className="font-semibold">Motion</span>
-        <span className="ml-5 flex items-center gap-3">
-          <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" aria-hidden="true">
-            <rect x="4.5" y="1.5" width="9" height="9" />
-            <path d="M1.5 3v6M16.5 3v6" />
-          </svg>
-          <svg className="opacity-50" width="14" height="12" viewBox="0 0 14 12" fill="none" stroke="currentColor" aria-hidden="true">
-            <rect x=".5" y=".5" width="5" height="4.5" />
-            <rect x="8.5" y=".5" width="5" height="4.5" />
-            <rect x=".5" y="7" width="5" height="4.5" />
-            <rect x="8.5" y="7" width="5" height="4.5" />
-          </svg>
-        </span>
-      </nav>
 
       <div className="sc-caption z-30 opacity-0">
         <p ref={capTitle} className="text-[15px] font-semibold">{first.title}</p>
