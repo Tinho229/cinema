@@ -13,36 +13,31 @@ import {
   type Texture,
 } from "three";
 import { showcaseState } from "@/lib/showcaseState";
-import { ACTIVE, CARD_ASPECT, COUNT, GAP, LAYOUT } from "@/lib/showcaseLayout";
+import { ACTIVE, CARD_ASPECT, GAP, LAYOUT, SLOTS, restingSlot, slotOf } from "@/lib/showcaseLayout";
+import { NOTES, PROJECTS } from "@/lib/showcaseContent";
 import { LensEffect } from "./LensEffect";
+import { GlassSlot } from "./GlassSlot";
 
-/* Une image par projet, dans l'ordre des légendes de ShowcaseLayer.
-   Avec 6 cartes, la liste boucle : la 6e carte reprend la 1re. */
-const IMAGES = [
-  "/images/projects/p5.jpg",
-  "/images/projects/p1.jpg",
-  "/images/projects/p2.jpg",
-  "/images/projects/p3.jpg",
-  "/images/projects/p4.jpg",
-];
-const SRC = Array.from({ length: COUNT }, (_, i) => IMAGES[i % IMAGES.length]);
-
-/* Position (en pas) de la carte i par rapport au centre de l'écran :
-   -2 … +2 pour 5 cartes, -2.5 … +2.5 pour 6. */
-const slotOf = (i: number) => i - (COUNT - 1) / 2;
+/* Part de l'image source rognée en haut / en bas (0 → 1). Les captures actuelles
+   ont une bande noire (≈ 15 px en haut, 4 px en bas sur 626) : l'ancienne version
+   CSS la masquait par un scale(1.03), perdu au passage en WebGL.
+   Mets { top: 0, bottom: 0 } avec des images propres. */
+const TRIM = { top: 0.026, bottom: 0.008 };
 
 /* Ajuste une image à la carte comme `object-fit: cover`
-   (sans ça, l'image 1080×626 est écrasée dans un rectangle d'autre ratio). */
+   (sans ça, l'image 1080×626 est écrasée dans un rectangle d'autre ratio),
+   après avoir rogné TRIM. v = 0 est le bas de l'image (flipY). */
 function coverTexture(base: Texture): Texture {
   const t = base.clone();
   const img = base.image as { width: number; height: number };
-  const imgAspect = img.width / img.height;
+  const keep = 1 - TRIM.top - TRIM.bottom; // part de hauteur conservée
+  const imgAspect = img.width / (img.height * keep);
   if (imgAspect > CARD_ASPECT) {
-    t.repeat.set(CARD_ASPECT / imgAspect, 1);
-    t.offset.set((1 - t.repeat.x) / 2, 0);
+    t.repeat.set(CARD_ASPECT / imgAspect, keep);
+    t.offset.set((1 - t.repeat.x) / 2, TRIM.bottom);
   } else {
-    t.repeat.set(1, imgAspect / CARD_ASPECT);
-    t.offset.set(0, (1 - t.repeat.y) / 2);
+    t.repeat.set(1, (keep * imgAspect) / CARD_ASPECT);
+    t.offset.set(0, TRIM.bottom + (keep - t.repeat.y) / 2);
   }
   t.colorSpace = SRGBColorSpace;
   t.anisotropy = 4;
@@ -114,20 +109,18 @@ function Card({ i, src }: { i: number; src: string }) {
     const m = mesh.current;
     const mt = mat.current;
     if (!m || !mt) return;
-    const w = size.width * (size.width < 768 ? LAYOUT.wMobile : LAYOUT.w);
-    const h = w / CARD_ASPECT;
-    const gap = w * GAP;
     const { zoom, spread } = showcaseState;
 
-    m.scale.set(w, h, 1);
     if (i === ACTIVE) {
-      m.scale.multiplyScalar(zoom);
+      const w = size.width * (size.width < 768 ? LAYOUT.wMobile : LAYOUT.w);
+      m.scale.set(w * zoom, (w / CARD_ASPECT) * zoom, 1);
       mt.opacity = MathUtils.clamp((3.2 - zoom) * 1.5, 0, 1);
       // part du centre de l'écran, glisse vers sa place pendant l'ouverture
-      m.position.x = slotOf(i) * gap * spread;
+      m.position.x = slotOf(i) * w * GAP * spread;
     } else {
-      m.position.x = slotOf(i) * gap * MathUtils.lerp(2.6, 1, spread);
-      m.scale.multiplyScalar(MathUtils.lerp(0.85, 1, spread));
+      const slot = restingSlot(i, size.width, spread);
+      m.position.x = slot.x;
+      m.scale.set(slot.w, slot.h, 1);
       mt.opacity = spread;
     }
   });
@@ -161,9 +154,14 @@ export function Showcase3D() {
       style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
     >
       <Background />
-      {SRC.map((s, i) => (
-        <Card key={`${i}-${s}`} i={i} src={s} />
-      ))}
+      {/* La rangée : images et verres selon SLOTS (showcaseLayout.ts) */}
+      {SLOTS.map((slot, i) =>
+        slot.kind === "image" ? (
+          <Card key={`slot-${i}`} i={i} src={PROJECTS[slot.project].src} />
+        ) : (
+          <GlassSlot key={`slot-${i}`} i={i} note={NOTES[slot.note]} phase={slot.note * 4.5} />
+        )
+      )}
       <EffectComposer multisampling={0}>
         <primitive object={lens} />
       </EffectComposer>

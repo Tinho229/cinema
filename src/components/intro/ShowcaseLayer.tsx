@@ -4,19 +4,12 @@ import { Suspense, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { showcaseState } from "@/lib/showcaseState";
-import { ACTIVE, COUNT } from "@/lib/showcaseLayout";
+import { ACTIVE, COUNT, SLOTS } from "@/lib/showcaseLayout";
+import { NOTES, PROJECTS } from "@/lib/showcaseContent";
 
 const Showcase3D = dynamic(() => import("./Showcase3D").then((m) => ({ default: m.Showcase3D })), {
   ssr: false,
 });
-
-const projects = [
-  { title: "Projet Cinq", sub: "Direction artistique" },
-  { title: "Rimma", sub: "Identité visuelle" },
-  { title: "Liverpool House", sub: "Résidentiel complexe" },
-  { title: "Yantos", sub: "Site web" },
-  { title: "Projet Quatre", sub: "Motion design" },
-];
 
 export function ShowcaseLayer() {
   const layer = useRef<HTMLDivElement>(null);
@@ -95,7 +88,11 @@ export function ShowcaseLayer() {
     };
   }, []);
 
-  const center = projects[ACTIVE];
+  // carte active : toujours une image (cf. ACTIVE dans showcaseLayout.ts)
+  const active = SLOTS[ACTIVE];
+  const center = PROJECTS[active.kind === "image" ? active.project : 0];
+  // textes des verres : dessinés dans un canvas, on les double pour les lecteurs d'écran
+  const notes = SLOTS.flatMap((slot) => (slot.kind === "glass" ? [NOTES[slot.note]] : []));
 
   return (
     <div
@@ -146,6 +143,15 @@ export function ShowcaseLayer() {
       <div className="sc-caption z-30 opacity-0">
         <p className="text-[15px] font-semibold">{center.title}</p>
         <p className="mt-1 text-[12px] text-[#c8c4bc]/70">{center.sub}</p>
+      </div>
+
+      <div className="sr-only">
+        {notes.map((n) => (
+          <section key={n.title}>
+            <h2>{n.title}</h2>
+            <p>{n.body}</p>
+          </section>
+        ))}
       </div>
 
     </div>
