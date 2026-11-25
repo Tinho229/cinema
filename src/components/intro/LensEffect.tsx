@@ -8,6 +8,11 @@ import { showcaseState } from "@/lib/showcaseState";
    1. Cadre arrondi : la compression HORIZONTALE grandit avec la distance
       verticale au centre -> les coins sortent de l'image et deviennent
       noirs, avec un arrondi (visible sur la capture du hero).
+      Elle suit |y|^4 (et non |y|^2) : aux coins le résultat est identique,
+      mais à hauteur des cartes le décalage tombe sous 0,1 px. Avec |y|^2 il
+      montait à ~1 px en haut/en bas des cartes de gauche, et ce rééchantillonnage
+      sous-pixel adoucissait légèrement les images.
+      Pour revenir à l'ancien arrondi : remplace y2 * y2 par y2 dans curve().
    2. Cartes plus hautes vers les côtés : l'échelle VERTICALE grandit
       avec la distance horizontale au centre -> les bords haut/bas des
       cartes latérales se relèvent. L'axe horizontal médian n'est pas
@@ -33,7 +38,8 @@ vec2 curve(vec2 uv) {
   vec2 c = uv - 0.5;
   vec2 n = c * 2.0;                         // -1 .. 1
   float t = prof(abs(n.x));
-  float fx = 1.0 + uKx * n.y * n.y;         // > 1 : compresse vers le centre
+  float y2 = n.y * n.y;
+  float fx = 1.0 + uKx * y2 * y2;           // > 1 : compresse vers le centre (|y|^4)
   float fy = 1.0 - uKy * t * t;             // < 1 : agrandit vers les côtés
   return 0.5 + vec2(c.x * fx, c.y * fy);
 }

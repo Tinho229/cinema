@@ -13,7 +13,7 @@ import {
   type ShaderMaterial,
   type Texture,
 } from "three";
-import { showcaseState } from "@/lib/showcaseState";
+import { HERO_DIM, showcaseState } from "@/lib/showcaseState";
 import { N_PROJECTS, projectAt, slotRect, transition } from "@/lib/showcaseLayout";
 import { PROJECTS, type Note } from "@/lib/showcaseContent";
 import { drawGlassText, GLASS_TEXT_H, GLASS_TEXT_W } from "@/lib/glassText";
@@ -22,12 +22,15 @@ import { drawGlassText, GLASS_TEXT_H, GLASS_TEXT_W } from "@/lib/glassText";
    Verre dépoli dessiné DANS la scène WebGL (voir la version précédente
    pour le détail du rendu : fond réduit, saturation, arêtes, reflet…).
 
-   Nouveau : transition « verre brisé ».
+   Transition « verre brisé ».
    Pendant la transition (uT : 0 -> 1), le verre est découpé en une grille
    de GRID_X × GRID_Y petits carrés. Chaque carré, avec un retard aléatoire :
      1. rétrécit en tournant un peu, son contenu zoome, puis disparaît (u 0 -> .5)
      2. à mi-parcours, passe du texte actuel au texte suivant
      3. se reconstruit (u .5 -> 1) jusqu'à reprendre sa place
+
+   Fond vu à travers le verre : c'est l'image du hero (calque DOM sous le canvas),
+   donc sa luminosité suit celle du fond : voir useFrame (HERO_DIM).
 ------------------------------------------------------------------- */
 
 const GRID_X = 16;
@@ -272,8 +275,8 @@ export function GlassSlot({ i, project, phase = 0 }: Props) {
         uSize: { value: new Vector2(1, 1) },
         uGrid: { value: new Vector2(GRID_X, GRID_Y) },
         uPad: { value: 0 },
-        uTint: { value: new Color("#777777") }, // = color du matériau de Background
-        uBgAlpha: { value: 0 },
+        uTint: { value: new Color(1, 1, 1) }, // réglée à chaque frame (luminosité du fond)
+        uBgAlpha: { value: 1 },
         uOpacity: { value: 0 },
         uTextAlpha: { value: 0 },
         uTime: { value: 0 },
@@ -312,7 +315,14 @@ export function GlassSlot({ i, project, phase = 0 }: Props) {
     u.uBgSize.value.set(bw, bh);
     u.uSize.value.set(slot.w, slot.h);
     u.uPad.value = pad;
-    u.uBgAlpha.value = bg;
+
+    // Luminosité du fond derrière le verre = celle de l'image du hero à l'écran :
+    // 1 au départ, HERO_DIM une fois le fondu terminé (même courbe que .hero-soft).
+    // setRGB(..., SRGBColorSpace) convertit comme le fait le navigateur pour le voile noir.
+    const dim = MathUtils.lerp(1, HERO_DIM, bg);
+    u.uTint.value.setRGB(dim, dim, dim, SRGBColorSpace);
+    u.uBgAlpha.value = 1;
+
     u.uOpacity.value = spread;
     u.uTextAlpha.value = MathUtils.smoothstep(spread, 0.55, 1);
     u.uTime.value = reduced ? 0 : state.clock.elapsedTime + phase;
@@ -333,4 +343,4 @@ export function GlassSlot({ i, project, phase = 0 }: Props) {
       />
     </mesh>
   );
-}""
+}

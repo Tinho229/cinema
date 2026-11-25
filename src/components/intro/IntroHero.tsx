@@ -1,9 +1,10 @@
 "use client";
-
+import { FooterLayer } from "./FooterLayer";
 import { ShowcaseLayer } from "./ShowcaseLayer";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { resetIntro, introState } from "@/lib/introState";
+import { HERO_BLUR, HERO_DIM } from "@/lib/showcaseState";
 
 import dynamic from "next/dynamic";
 
@@ -166,13 +167,34 @@ export function IntroHero() {
   return (
     <section
       ref={root}
-      className="relative h-dvh w-full overflow-hidden bg-[#0a0a0a] text-[#f4f1ea]"
+      className="relative h-dvh w-full overflow-hidden bg-black text-[#f4f1ea]"
     >
-      <img
-  src="/images/hero.jpg"
-  alt="Blond"
-  className="hero-bg absolute inset-0 h-full w-full object-cover"
-/>
+      {/* Image du hero : elle RESTE affichée pendant tout le scroll (plus de fondu
+          vers le noir). Quand on arrive sur les images, .hero-soft (la même image,
+          floutée et assombrie) apparaît par-dessus en fondu : l'effet « luminosité
+          baissée ». C'est un calque DOM sous le canvas WebGL : il n'a aucun effet
+          sur les images. Réglages : HERO_DIM / HERO_BLUR dans lib/showcaseState.ts */}
+      <div className="hero-media absolute inset-0">
+        <img
+          src="/images/hero.jpg"
+          alt="Blond"
+          className="hero-bg absolute inset-0 h-full w-full object-cover"
+        />
+        <div
+          className="hero-soft pointer-events-none absolute inset-0 overflow-hidden opacity-0"
+          aria-hidden="true"
+        >
+          <img
+            src="/images/hero.jpg"
+            alt=""
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover"
+            // scale : cache le bord transparent que crée le flou
+            style={{ filter: `blur(${HERO_BLUR}px)`, transform: "scale(1.08)" }}
+          />
+          <div className="absolute inset-0 bg-black" style={{ opacity: 1 - HERO_DIM }} />
+        </div>
+      </div>
 
       {/* Damier (sans flou), sous le clap */}
       <div className="pointer-events-none absolute inset-0 z-[5]">
@@ -241,14 +263,18 @@ export function IntroHero() {
 
       {/* Invite à défiler, visible quand l'intro est terminée */}
       {done && (
-      <div className="scroll-hint pointer-events-none absolute right-6 bottom-8 z-20 flex items-center gap-3 text-xs text-[#c8c4bc] md:right-8">
-        <span>Faites défiler</span>
-        <span className="h-px w-10 animate-pulse bg-[#c8c4bc]" />
-      </div>
-    )}
+        <div className="scroll-hint pointer-events-none absolute right-6 bottom-8 z-20 flex items-center gap-3 text-xs text-[#c8c4bc] md:right-8">
+          <span>Faites défiler</span>
+          <span className="h-px w-10 animate-pulse bg-[#c8c4bc]" />
+        </div>
+      )}
 
       <div className="flash pointer-events-none absolute inset-0 z-50 bg-[#f4f1ea]" />
       <ShowcaseLayer />
+
+      {/* Footer : au-dessus de tout, révélé par colonnes à la fin du scroll
+          (la timeline est dans ShowcaseLayer). */}
+      <FooterLayer />
     </section>
   );
 }

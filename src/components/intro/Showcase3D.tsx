@@ -5,12 +5,10 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import { EffectComposer } from "@react-three/postprocessing";
 import {
-  CanvasTexture,
   MathUtils,
   SRGBColorSpace,
   Vector4,
   type Mesh,
-  type MeshBasicMaterial,
   type ShaderMaterial,
 } from "three";
 import { showcaseState } from "@/lib/showcaseState";
@@ -46,57 +44,9 @@ function coverTransform(image: unknown): [number, number, number, number] {
   return [1, ry, 0, TRIM.bottom + (keep - ry) / 2];
 }
 
-/* Fond : même image que le hero, floutée, dessinée DANS la scène
-   pour que la lentille la déforme aussi. */
-function Background() {
-  const tex = useTexture("/images/hero.jpg");
-  const { size } = useThree();
-  const mesh = useRef<Mesh>(null);
-  const mat = useRef<MeshBasicMaterial>(null);
-
-  const blurred = useMemo(() => {
-    const img = tex.image as HTMLImageElement;
-    const c = document.createElement("canvas");
-    c.width = Math.max(1, Math.round(img.width / 8));
-    c.height = Math.max(1, Math.round(img.height / 8));
-    const ctx = c.getContext("2d");
-    if (ctx) {
-      ctx.filter = "blur(2px)";
-      ctx.drawImage(img, 0, 0, c.width, c.height);
-    }
-    const t = new CanvasTexture(c);
-    t.colorSpace = SRGBColorSpace;
-    return t;
-  }, [tex]);
-
-  useFrame(() => {
-    const m = mesh.current;
-    const mt = mat.current;
-    if (!m || !mt) return;
-    const img = tex.image as HTMLImageElement;
-    const imgRatio = img.width / img.height;
-    const viewRatio = size.width / size.height;
-    const w = viewRatio > imgRatio ? size.width : size.height * imgRatio;
-    const h = viewRatio > imgRatio ? size.width / imgRatio : size.height;
-    m.scale.set(w * 1.02, h * 1.02, 1);
-    mt.opacity = showcaseState.bg;
-  });
-
-  return (
-    <mesh ref={mesh} position={[0, 0, -1]} renderOrder={-1}>
-      <planeGeometry args={[1, 1]} />
-      <meshBasicMaterial
-        ref={mat}
-        map={blurred}
-        color="#777777"
-        transparent
-        depthTest={false}
-        depthWrite={false}
-        toneMapped={false}
-      />
-    </mesh>
-  );
-}
+/* Plus de fond dans la scène : l'image du hero est un calque DOM (voir
+   IntroHero.tsx) qui reste sous ce canvas, transparent là où il n'y a rien.
+   Le flou et l'assombrissement du fond n'ont donc aucune prise sur les images. */
 
 /* Image qui change PAR COLONNES : un front horizontal balaie chaque colonne,
    colonnes paires du bas vers le haut, impaires du haut vers le bas. */
@@ -240,12 +190,13 @@ export function Showcase3D() {
   return (
     <Canvas
       orthographic
-      dpr={[1, 1.5]}
+      // jusqu'à 2 : à 1.5, un écran retina (dpr 2-3) étire le canvas, donc toute
+      // l'image, et la rend molle. C'était la principale cause du flou des images.
+      dpr={[1, 2]}
       camera={{ position: [0, 0, 10], zoom: 1 }}
       gl={{ alpha: true, antialias: false }}
       style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
     >
-      <Background />
       {/* Bloc de gauche : les images. Bloc de droite : les verres. */}
       {PROJECTS.map((_, i) => (
         <Card key={`img-${i}`} i={i} />
