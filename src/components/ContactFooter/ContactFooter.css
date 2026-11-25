@@ -9,7 +9,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   padding: 16px;
-  background: #111110;
+  
   color: #e9e4da;
   font-family: var(--font-body, Arial, sans-serif);
 }
@@ -46,9 +46,16 @@
 
 /* Image confinée dans le conteneur */
 .cf-visual__image {
-  object-fit: cover;
-  object-position: center;
-  z-index: 0;
+  .cf-visual__image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* remplit la carte sans déformer */
+      object-position: center;
+      z-index: 0;
+    }
 }
 
 /* Overlay */
@@ -106,7 +113,7 @@
 }
 
 .cf-card {
-  background: #111110;
+  background: transparent
 }
 
 .cf-card__title {
@@ -158,7 +165,7 @@
   position: relative;
   overflow: hidden;
   border-radius: 18px;
-  background: #262621;
+  background: transparent
 }
 
 .cf-gallery__item img {
@@ -265,6 +272,7 @@
 
   .cf-visual {
     min-height: 600px;
+    background: transparent
   }
 
   .cf-right {
@@ -393,3 +401,98 @@
     gap: 12px;
   }
 }
+
+/*export const footerData= {
+
+  brand: "ATELIER",
+  title: "GET IN\nTOUCH",
+  menu: [ {
+    label: "MENU", href: "#menu"
+  }
+
+  ,
+  {
+  label: "ABOUT", href: "#about"
+}
+
+,
+{
+label: "BOOK A TABLE", href: "#booking"
+}
+
+,
+],
+
+openingTitle: "REJOIGNEZ-NOUS LE",
+openingHours: [ {
+  day: "Mon", hours: "16:00 - 22:30"
+}
+
+,
+{
+day: "Tue", hours: "16:00 - 22:30"
+}
+
+,
+{
+day: "Wed", hours: "16:00 - 22:30"
+}
+
+,
+{
+day: "Thu", hours: "16:00 - 22:30"
+}
+
+,
+{
+day: "Fri", hours: "16:00 - 22:30"
+}
+
+,
+{
+day: "Sat & Sun", hours: "16:00 - 22:30"
+}
+
+,
+],
+
+gallery: [ "/images/footer/gallery-1.jpg",
+"/images/footer/gallery-2.jpg",
+"/images/footer/gallery-3.jpg",
+"/images/footer/gallery-4.jpg",
+],
+
+mainImage: "/images/footer/main.jpg",
+
+contactTitle: "CONTACT",
+addressLabel: "ADDRESS",
+address: ["Hôtel Mavilla, Cotonou, Bénin"],
+
+phoneLabel: "PHONE",
+phone: "+229 01 97 19 83 00",
+
+emailLabel: "EMAIL",
+email: "hotelmavilla@yahoo.com",
+
+followLabel: "SITE",
+socials: [ {
+  label: "Mavilla", href: "https://hotelmavillacotonou.com"
+}
+
+],
+
+copyright: "© 2026 ATELIER",
+legal: [ {
+  label: "PRIVACY", href: "/privacy"
+}
+
+,
+{
+label: "LEGAL", href: "/legal"
+}
+
+,
+],
+}
+
+;*/

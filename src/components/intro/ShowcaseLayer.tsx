@@ -22,20 +22,18 @@ const DIM_START = 0.4;
 const DIM_UNITS = 3.2;
 
 /* ---- Footer : remplace la section des images, colonne par colonne --------------
-   Même principe que le changement d'image des cartes : colonnes paires balayées
-   du bas vers le haut, impaires du haut vers le bas, avec un départ décalé et
-   aléatoire par colonne. */
+   Vague de gauche à droite : la colonne 1 part du bas à gauche et monte ; quelques
+   instants plus tard la colonne 2 part à son tour du bas et monte, puis la 3, etc.
+   Toutes les colonnes montent du bas vers le haut et se chevauchent dans le temps. */
 const WIPE_COLS = 8;
-const WIPE_UNITS = 3.2; //   durée du balayage (unités de timeline)
-const WIPE_STAGGER = 0.35; // part du balayage utilisée par les décalages de départ
-const END_HOLD = 0.4; //      petite pause finale, footer entièrement affiché
+const WIPE_UNITS = 3.5; //  durée totale du balayage (unités de timeline) : plus grand = plus lent
+const COL_DELAY = 0.07; //  écart de départ entre deux colonnes, en part du balayage (0..1)
+const END_HOLD = 0.4; //    petite pause finale, footer entièrement affiché
 
-// même fonction de hasard que le shader des cartes : mêmes colonnes en avance
-const colHash = (n: number) => {
-  const v = Math.sin(n * 91.3458) * 47453.5453;
-  return v - Math.floor(v);
-};
-const DELAYS = Array.from({ length: WIPE_COLS }, (_, c) => colHash(c + 1) * WIPE_STAGGER);
+// Durée d'une colonne (part du balayage) et départ de chacune.
+// La dernière colonne finit exactement à 1 : durée = 1 - (colonnes - 1) * écart.
+const COL_DUR = 1 - (WIPE_COLS - 1) * COL_DELAY;
+const COL_START = Array.from({ length: WIPE_COLS }, (_, c) => c * COL_DELAY);
 const MASK_IMAGE = Array.from({ length: WIPE_COLS }, () => "linear-gradient(#000,#000)").join(",");
 const MASK_KEYS = ["mask-image", "mask-repeat", "mask-position", "mask-size"];
 
@@ -51,7 +49,7 @@ function clearMask(el: HTMLElement) {
 }
 
 /* Un calque de masque par colonne : largeur = la colonne, hauteur = sa progression.
-   Les colonnes paires sont ancrées en bas, les impaires en haut. Les bords sont
+   Toutes les colonnes sont ancrées en bas, donc elles montent. Les bords sont
    arrondis au pixel pour qu'aucun filet n'apparaisse entre deux colonnes. */
 function paintWipe(el: HTMLElement, t: number, width: number) {
   const sizes: string[] = [];
@@ -59,14 +57,14 @@ function paintWipe(el: HTMLElement, t: number, width: number) {
   let done = true;
 
   for (let c = 0; c < WIPE_COLS; c++) {
-    let p = Math.min(Math.max((t - DELAYS[c]) / (1 - WIPE_STAGGER), 0), 1);
+    let p = Math.min(Math.max((t - COL_START[c]) / COL_DUR, 0), 1);
     p = p * p * (3 - 2 * p); // smoothstep, comme le shader
     if (p < 1) done = false;
 
     const x0 = Math.round((c * width) / WIPE_COLS);
     const x1 = Math.round(((c + 1) * width) / WIPE_COLS);
     sizes.push(`${x1 - x0}px ${(p * 100).toFixed(2)}%`);
-    pos.push(`${x0}px ${c % 2 === 0 ? "100%" : "0%"}`);
+    pos.push(`${x0}px 100%`); // ancrée en bas : la colonne monte
   }
 
   // tout est révélé : on retire le masque (plus rien à calculer pour le navigateur)
@@ -93,6 +91,11 @@ export function ShowcaseLayer() {
     // le footer est rendu par IntroHero (<FooterLayer />), dans la même section
     const footer = hero.querySelector<HTMLElement>(".footer-layer");
     const slide = footer?.querySelector<HTMLElement>(".footer-slide") ?? null;
+    if (!footer && process.env.NODE_ENV !== "production") {
+      console.warn(
+        "[ShowcaseLayer] .footer-layer introuvable : <FooterLayer /> doit être rendu dans la <section> d'IntroHero. La transition du footer est ignorée."
+      );
+    }
     const wipe = { p: 0 };
     const repaintWipe = () => {
       if (footer) paintWipe(footer, wipe.p, el.clientWidth);
