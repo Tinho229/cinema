@@ -16,6 +16,12 @@ const Showcase3D = dynamic(() => import("./Showcase3D").then((m) => ({ default: 
    = plus de scroll, sans que chaque transition soit raccourcie. */
 const SCROLL_PER_UNIT = 37;
 
+/* ---- Image du hero : elle reste, puis se floute / s'assombrit ------------------
+   Le fondu démarre quand la première image arrive et finit quand la rangée est
+   en place. Le même rythme pilote la luminosité du fond vu à travers les verres. */
+const DIM_START = 0.4;
+const DIM_UNITS = 3.2;
+
 /* ---- Footer : remplace la section des images, colonne par colonne --------------
    Vague de gauche à droite : la colonne 1 part du bas à gauche et monte ; quelques
    instants plus tard la colonne 2 part à son tour du bas et monte, puis la 3, etc.
@@ -125,7 +131,6 @@ export function ShowcaseLayer() {
 
     const build = () => {
       showcaseState.step = 0;
-      showcaseState.bg = 0; // le fond assombri est mis en place par la galerie (voir galleryTimeline.ts)
       wipe.p = 0;
       repaintWipe();
       let shown = activeProject(0);
@@ -140,9 +145,6 @@ export function ShowcaseLayer() {
         }
       };
 
-      // rempli plus bas : dès que le scroll commence, la montée automatique de la galerie s'accélère
-      let stopGalleryAutoplay: () => void = () => {};
-
       ctx = gsap.context(() => {
         const tl = gsap.timeline({
           defaults: { ease: "power2.inOut" },
@@ -155,40 +157,41 @@ export function ShowcaseLayer() {
             pin: hero,
             anticipatePin: 1,
             invalidateOnRefresh: true,
-            onUpdate: (self) => {
-              if (self.progress > 0.001) stopGalleryAutoplay();
-            },
           },
         });
 
-        // 1) 2 s après la fin de l'intro, la section « Transformation gallery » monte
-        //    toute seule du bas vers le haut. Au scroll : les cartes suivantes arrivent
-        //    une à une, puis la section repart.
+        // 1) Après l'intro, au premier scroll : la section « Transformation gallery »
+        //    monte du bas vers le haut (fond, titre, texte ET image ensemble), les
+        //    cartes suivantes arrivent par-dessus une à une, puis la section repart.
         //    Réglages : GALLERY_TIMING dans components/transformation/galleryTimeline.ts
         const gallery = addGalleryTimeline(tl, hero);
-        stopGalleryAutoplay = gallery.stopAutoplay;
 
-        // 2) La scène des images démarre dès que la section commence à repartir.
-        //    Tout ce qui suit est calé sur ce label.
+        // 2) La scène des images démarre pendant la sortie de la section.
+        //    Tout ce qui suit est calé sur ce label (avant : sur 0).
         tl.addLabel("showcase", gallery.showcaseAt);
         const at = (d: number) => `showcase+=${d}`;
 
-        // Le titre de l'intro s'efface au premier scroll.
+        // Le titre de l'intro s'efface dès que la section commence à monter.
         tl.to(".title-end, .scroll-hint", { opacity: 0, y: -24, filter: "blur(8px)", duration: 1.4 }, 0);
 
-        // Légère avancée de l'image du hero, une fois la galerie partie
-        tl.fromTo(".hero-media", { scale: 1 }, { scale: 1.06, duration: 3, ease: "power2.inOut" }, at(2));
+        // L'image du hero RESTE : plus de fondu vers le noir, juste une légère avancée.
+        tl.fromTo(".hero-media", { scale: 1 }, { scale: 1.06, duration: 3, ease: "power2.inOut" }, at(0));
 
-        // Scène WebGL : les images arrivent tout de suite, sans temps mort.
-        // (le fond assombri et showcaseState.bg sont déjà en place : voir la galerie)
-        tl.fromTo(showcaseState, { lens: 0 }, { lens: 1, duration: 3.5, ease: "power2.out" }, at(0));
-        tl.fromTo(showcaseState, { zoom: 3.2 }, { zoom: 1, duration: 3.2, ease: "power3.out" }, at(0));
-        tl.fromTo(showcaseState, { spread: 0 }, { spread: 1, duration: 3, ease: "power3.out" }, at(1.1));
+        // Quand les images arrivent : version floutée + assombrie en fondu par-dessus.
+        // (calque DOM sous le canvas : les images ne sont jamais touchées)
+        tl.fromTo(".hero-soft", { opacity: 0 }, { opacity: 1, duration: DIM_UNITS, ease: "none" }, at(DIM_START));
 
-        tl.fromTo(".sc-focus", { opacity: 0, scale: 1.25 }, { opacity: 1, scale: 1, duration: 1, ease: "power3.out" }, at(3.5));
-        tl.fromTo(".sc-caption", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }, at(3.7));
-        tl.fromTo(".sc-filters", { opacity: 0 }, { opacity: 1, duration: 0.8 }, at(3.9));
-        tl.fromTo(".sc-header", { opacity: 0 }, { opacity: 1, duration: 0.8 }, at(3.9));
+        // Scène WebGL : tout passe par showcaseState
+        // bg suit le même fondu que .hero-soft : les verres voient la même luminosité
+        tl.fromTo(showcaseState, { bg: 0 }, { bg: 1, duration: DIM_UNITS, ease: "none" }, at(DIM_START));
+        tl.fromTo(showcaseState, { lens: 0 }, { lens: 1, duration: 3.5, ease: "power2.out" }, at(0.5));
+        tl.fromTo(showcaseState, { zoom: 3.2 }, { zoom: 1, duration: 3.2, ease: "power3.out" }, at(0.5));
+        tl.fromTo(showcaseState, { spread: 0 }, { spread: 1, duration: 3, ease: "power3.out" }, at(1.6));
+
+        tl.fromTo(".sc-focus", { opacity: 0, scale: 1.25 }, { opacity: 1, scale: 1, duration: 1, ease: "power3.out" }, at(4));
+        tl.fromTo(".sc-caption", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }, at(4.2));
+        tl.fromTo(".sc-filters", { opacity: 0 }, { opacity: 1, duration: 0.8 }, at(4.4));
+        tl.fromTo(".sc-header", { opacity: 0 }, { opacity: 1, duration: 0.8 }, at(4.4));
 
         // Une transition par histoire : pause, brisure / changement, pause…
         tl.to({}, { duration: 1 });

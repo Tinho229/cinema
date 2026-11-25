@@ -1,4 +1,3 @@
-import { Anton } from "next/font/google";
 import { HERO_BLUR, HERO_DIM } from "@/lib/showcaseState";
 import { TestimonialCard } from "./TestimonialCard";
 import {
@@ -8,29 +7,14 @@ import {
 } from "./testimonials";
 import "./TransformationGallery.css";
 
-const display = Anton({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-tg-display",
-  display: "swap",
-});
-
-/* Section rendue DANS la <section> épinglée d'IntroHero, au-dessus de la scène
-   des images (z-65) et sous le footer (z-70). Elle est hors écran au départ :
-   la timeline de ShowcaseLayer (voir galleryTimeline.ts) la fait monter du bas
-   vers le haut, puis fait arriver les cartes une à une.
-
-   Fond : la même image que le hero, à luminosité baissée (HERO_DIM / HERO_BLUR
-   dans lib/showcaseState.ts). Le calque est dans .tg-layer, donc il monte avec. */
 export function TransformationGallery() {
   return (
-    <div className={`tg-layer ${display.variable}`}>
+    <div className="tg-layer">
       <div className="tg-bg" aria-hidden="true">
         <img
           src="/images/hero.jpg"
           alt=""
           decoding="async"
-          // scale : cache le bord transparent que crée le flou
           style={{ filter: `blur(${HERO_BLUR}px)`, transform: "scale(1.08)" }}
         />
         <div className="tg-bg__dim" style={{ opacity: 1 - HERO_DIM }} />

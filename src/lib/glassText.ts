@@ -3,18 +3,41 @@ import type { Note } from "./showcaseContent";
 
 /* Le texte d'un verre est dessiné dans un canvas, puis posé comme texture sur
    la carte WebGL : il passe ainsi dans la lentille (courbure, aberration,
-   grain) exactement comme les images, ce qu'un texte HTML ne ferait pas.
+   grain) exactement comme les images.
 
-   Le canvas a le ratio d'une carte (1.6). Toutes les tailles ci-dessous sont
-   en pixels de canvas : à 1920 px d'écran une carte fait ~345 px, soit ~0.34
-   px d'écran par px de canvas (un corps de 44 donne donc ~15 px à l'écran). */
+   Styles alignés sur la galerie : titre Anton (--font-display), surtitre et
+   corps en crème atténué, interlettrage normal.
+
+   Le canvas a le ratio d'une carte (1.6). Toutes les tailles sont en pixels de
+   canvas : à 1920 px d'écran une carte fait ~345 px, soit ~0.34 px d'écran par
+   px de canvas. */
 export const GLASS_TEXT_W = 1024;
 export const GLASS_TEXT_H = Math.round(GLASS_TEXT_W / CARD_ASPECT);
 
 const PAD = 64;
-const CREAM = "244, 241, 234";
+const INK = "244, 241, 234";
+const MUTED = 0.64; // un peu plus lisible que 0.58 : le texte est sur un verre clair
 
 type Fit = { size: number; lines: string[] };
+
+/* Piles de polices : corps = celle du site, titre = Anton (variable CSS). */
+function families() {
+  const style = getComputedStyle(document.body);
+  const body = style.fontFamily || "system-ui, sans-serif";
+  const v = style.getPropertyValue("--font-display").trim();
+  const display = `${v ? `${v}, ` : ""}Impact, "Arial Narrow Bold", sans-serif`;
+  return { body, display };
+}
+
+/** À attendre avant de (re)dessiner : Anton n'est chargée que si on la demande. */
+export function loadGlassFonts(): Promise<unknown> {
+  if (typeof document === "undefined" || !document.fonts) return Promise.resolve();
+  const { display } = families();
+  return Promise.all([
+    document.fonts.load(`400 64px ${display}`).catch(() => []),
+    document.fonts.ready,
+  ]);
+}
 
 /* Coupe en lignes de largeur ≤ maxW. On ne sépare que sur l'espace normal :
    les espaces insécables du texte restent collés au mot. */
@@ -68,14 +91,8 @@ function fit(
   return { size, lines };
 }
 
-/* Capitales espacées (letterSpacing du canvas n'est pas supporté partout). */
-function spaced(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, spacing: number) {
-  let cx = x;
-  for (const ch of text) {
-    ctx.fillText(ch, cx, y);
-    cx += ctx.measureText(ch).width + spacing;
-  }
-}
+/* « NOTE D’INTENTION » -> « Note d’intention » (comme l'eyebrow de la galerie) */
+const sentenceCase = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 
 /**
  * Dessine le contenu d'un verre (texte seul, fond transparent : le verre
@@ -88,8 +105,7 @@ export function drawGlassText(canvas: HTMLCanvasElement, note: Note) {
   const W = canvas.width;
   const H = canvas.height;
   const maxW = W - PAD * 2;
-  // même police que le reste du site (Tailwind : pile système)
-  const family = getComputedStyle(document.body).fontFamily || "system-ui, sans-serif";
+  const { body: bodyFamily, display } = families();
 
   ctx.clearRect(0, 0, W, H);
   ctx.textAlign = "left";
@@ -99,44 +115,44 @@ export function drawGlassText(canvas: HTMLCanvasElement, note: Note) {
   ctx.shadowBlur = 10;
   ctx.shadowOffsetY = 2;
 
-  const eyebrowSize = 30;
+  const eyebrowSize = 32;
   const footSize = 28;
   let y = PAD;
 
-  // Surtitre
-  ctx.font = `700 ${eyebrowSize}px ${family}`;
-  ctx.fillStyle = `rgba(${CREAM}, 0.92)`;
-  spaced(ctx, note.eyebrow, PAD, y + eyebrowSize * 0.8, eyebrowSize * 0.16);
-  y += eyebrowSize * 0.8 + 30;
+  // Surtitre : atténué, casse normale, sans espacement
+  ctx.font = `400 ${eyebrowSize}px ${bodyFamily}`;
+  ctx.fillStyle = `rgba(${INK}, ${MUTED})`;
+  ctx.fillText(sentenceCase(note.eyebrow), PAD, y + eyebrowSize * 0.8);
+  y += eyebrowSize * 0.8 + 26;
 
-  // Titre : jusqu'à 2 lignes, la taille s'adapte
-  const title = fit(ctx, note.title, 600, family, maxW, 170, 2, 1.12, 68, 44);
-  ctx.font = `600 ${title.size}px ${family}`;
-  ctx.fillStyle = `rgb(${CREAM})`;
+  // Titre : Anton, jusqu'à 2 lignes, la taille s'adapte
+  const title = fit(ctx, note.title, 400, display, maxW, 190, 2, 1, 96, 56);
+  ctx.font = `400 ${title.size}px ${display}`;
+  ctx.fillStyle = `rgb(${INK})`;
   title.lines.forEach((line, n) => {
-    ctx.fillText(line, PAD, y + title.size * 0.92 + n * title.size * 1.12);
+    ctx.fillText(line, PAD, y + title.size * 0.92 + n * title.size);
   });
-  y += title.lines.length * title.size * 1.12;
+  y += title.lines.length * title.size;
 
   // Filet
   ctx.shadowColor = "transparent";
   ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
   ctx.fillRect(PAD, y + 16, 72, 2);
-  y += 16 + 2 + 34;
+  y += 16 + 2 + 30;
   ctx.shadowColor = "rgba(0, 0, 0, 0.35)";
 
   // Pied de carte, calé en bas
   const footY = H - PAD;
-  ctx.font = `500 ${footSize}px ${family}`;
-  ctx.fillStyle = `rgba(${CREAM}, 0.78)`;
+  ctx.font = `500 ${footSize}px ${bodyFamily}`;
+  ctx.fillStyle = `rgba(${INK}, ${MUTED})`;
   ctx.fillText(note.foot, PAD, footY);
 
   // Corps : prend la place restante entre le filet et le pied
   const bodyBottom = footY - footSize - 28;
-  const body = fit(ctx, note.body, 400, family, maxW, bodyBottom - y, 6, 1.4, 44, 26);
-  ctx.font = `400 ${body.size}px ${family}`;
-  ctx.fillStyle = `rgba(${CREAM}, 0.84)`;
+  const body = fit(ctx, note.body, 400, bodyFamily, maxW, bodyBottom - y, 6, 1.25, 44, 26);
+  ctx.font = `400 ${body.size}px ${bodyFamily}`;
+  ctx.fillStyle = `rgba(${INK}, ${MUTED + 0.1})`;
   body.lines.forEach((line, n) => {
-    ctx.fillText(line, PAD, y + body.size * 0.95 + n * body.size * 1.4);
+    ctx.fillText(line, PAD, y + body.size * 0.95 + n * body.size * 1.25);
   });
 }
