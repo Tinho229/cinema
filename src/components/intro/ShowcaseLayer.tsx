@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { showcaseState } from "@/lib/showcaseState";
-import { FOCUS, MAX_STEP, activeProject, blockRect, slotRect } from "@/lib/showcaseLayout";
+import { FOCUS, MAX_STEP, activeProject, blockRect, isStackedViewport, slotRect } from "@/lib/showcaseLayout";
 import { PROJECTS } from "@/lib/showcaseContent";
 import { addGalleryTimeline } from "@/components/transformation/galleryTimeline";
 
@@ -102,12 +102,13 @@ export function ShowcaseLayer() {
       if (footer) paintWipe(footer, wipe.p, el.clientWidth);
     };
 
-    // cadre, légende et filtres suivent la disposition (px, calculés depuis la largeur)
+    // cadre, légende et filtres suivent la disposition (px, calculés depuis largeur + hauteur)
     const place = () => {
       const W = el.clientWidth;
       const H = el.clientHeight;
-      const fr = slotRect("image", FOCUS, W);
-      const bl = blockRect("image", W);
+      const stacked = isStackedViewport(W, H);
+      const fr = slotRect("image", FOCUS, W, 1, H);
+      const bl = blockRect("image", W, H);
       const set = (k: string, v: number) => el.style.setProperty(k, `${v}px`);
       set("--sc-fx", fr.x);
       set("--sc-fy", -fr.y);
@@ -115,11 +116,16 @@ export function ShowcaseLayer() {
       set("--sc-fh", fr.h * 1.035);
       set("--sc-bx", bl.x);
       set("--sc-bw", bl.w);
-      set("--sc-ctop", H / 2 - bl.y + bl.h / 2 + 22); // légende sous le bloc d'images
-      set("--sc-fbot", H / 2 + bl.y + bl.h / 2 + 22); // filtres au-dessus
+      set("--sc-ctop", H / 2 - bl.y + bl.h / 2 + (stacked ? 12 : 20)); // légende sous le bloc d'images
+      set("--sc-fbot", H / 2 + bl.y + bl.h / 2 + (stacked ? 12 : 20)); // filtres au-dessus
 
       // footer plus court que l'écran : centré ; plus long : calé en haut (il défile ensuite)
-      if (footer && slide) slide.style.top = `${Math.max(0, (H - slide.offsetHeight) / 2)}px`;
+      if (footer && slide) {
+        slide.style.top = `${Math.max(0, (H - slide.offsetHeight) / 2)}px`;
+        if (slide.offsetHeight <= H) {
+          gsap.set(slide, { y: 0 });
+        }
+      }
       repaintWipe();
     };
     place();
@@ -281,9 +287,19 @@ export function ShowcaseLayer() {
         </div>
       </div>
 
-      <div className="sc-caption z-30 opacity-0">
-        <p ref={capTitle} className="text-[15px] font-semibold">{first.title}</p>
-        <p ref={capSub} className="mt-1 text-[12px] text-[#c8c4bc]/70">{first.sub}</p>
+      <div className="sc-caption z-30 px-3 opacity-0">
+        <p
+          ref={capTitle}
+          className="tx-display text-lg leading-tight text-[#f4f1ea] [text-shadow:0_2px_12px_rgba(0,0,0,0.9)] md:text-2xl"
+        >
+          {first.title}
+        </p>
+        <p
+          ref={capSub}
+          className="mt-1 text-xs font-medium text-[#f4f1ea]/85 [text-shadow:0_1px_8px_rgba(0,0,0,0.9)] md:text-sm"
+        >
+          {first.sub}
+        </p>
       </div>
 
       {/* textes des verres : dessinés dans un canvas, doublés ici pour les lecteurs d'écran */}

@@ -5,36 +5,37 @@ import type { Note } from "./showcaseContent";
    la carte WebGL : il passe ainsi dans la lentille (courbure, aberration,
    grain) exactement comme les images.
 
-   Styles alignés sur la galerie : titre Anton (--font-display), surtitre et
-   corps en crème atténué, interlettrage normal.
+   Styles alignés sur le projet : titre Frigg Café (--font-display), surtitre et
+   corps en crème lisible (--font-body), contraste renforcé.
 
-   Le canvas a le ratio d'une carte (1.6). Toutes les tailles sont en pixels de
-   canvas : à 1920 px d'écran une carte fait ~345 px, soit ~0.34 px d'écran par
-   px de canvas. */
+   Le canvas a le ratio d'une carte (1.6). */
 export const GLASS_TEXT_W = 1024;
 export const GLASS_TEXT_H = Math.round(GLASS_TEXT_W / CARD_ASPECT);
 
-const PAD = 64;
+const PAD = 56;
 const INK = "244, 241, 234";
-const MUTED = 0.64; // un peu plus lisible que 0.58 : le texte est sur un verre clair
+const MUTED = 0.82;
+const BODY_ALPHA = 0.95;
 
 type Fit = { size: number; lines: string[] };
 
-/* Piles de polices : corps = celle du site, titre = Anton (variable CSS). */
+/* Piles de polices : corps = celle du site, titre = Frigg Café (variable CSS). */
 function families() {
   const style = getComputedStyle(document.body);
   const body = style.fontFamily || "system-ui, sans-serif";
   const v = style.getPropertyValue("--font-display").trim();
-  const display = `${v ? `${v}, ` : ""}Impact, "Arial Narrow Bold", sans-serif`;
+  const display = `${v ? `${v}, ` : ""}Georgia, serif`;
   return { body, display };
 }
 
-/** À attendre avant de (re)dessiner : Anton n'est chargée que si on la demande. */
+/** À attendre avant de (re)dessiner : s'assure que Frigg Café et le corps sont chargés. */
 export function loadGlassFonts(): Promise<unknown> {
   if (typeof document === "undefined" || !document.fonts) return Promise.resolve();
-  const { display } = families();
+  const { body, display } = families();
   return Promise.all([
-    document.fonts.load(`400 64px ${display}`).catch(() => []),
+    document.fonts.load(`400 72px ${display}`).catch(() => []),
+    document.fonts.load(`400 38px ${body}`).catch(() => []),
+    document.fonts.load(`500 36px ${body}`).catch(() => []),
     document.fonts.ready,
   ]);
 }
@@ -91,7 +92,7 @@ function fit(
   return { size, lines };
 }
 
-/* « NOTE D’INTENTION » -> « Note d’intention » (comme l'eyebrow de la galerie) */
+/* « NOTE D’INTENTION » -> « Note d’intention » */
 const sentenceCase = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 
 /**
@@ -110,36 +111,37 @@ export function drawGlassText(canvas: HTMLCanvasElement, note: Note) {
   ctx.clearRect(0, 0, W, H);
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
-  // petite ombre portée : garde le texte lisible sur les zones claires du verre
-  ctx.shadowColor = "rgba(0, 0, 0, 0.35)";
-  ctx.shadowBlur = 10;
+  // ombre portée marquée : garantit la lisibilité sur les zones lumineuses du verre
+  ctx.shadowColor = "rgba(0, 0, 0, 0.72)";
+  ctx.shadowBlur = 12;
   ctx.shadowOffsetY = 2;
 
-  const eyebrowSize = 32;
-  const footSize = 28;
+  const eyebrowSize = 36;
+  const footSize = 32;
   let y = PAD;
 
-  // Surtitre : atténué, casse normale, sans espacement
-  ctx.font = `400 ${eyebrowSize}px ${bodyFamily}`;
+  // Surtitre : lisible, casse normale
+  ctx.font = `500 ${eyebrowSize}px ${bodyFamily}`;
   ctx.fillStyle = `rgba(${INK}, ${MUTED})`;
-  ctx.fillText(sentenceCase(note.eyebrow), PAD, y + eyebrowSize * 0.8);
-  y += eyebrowSize * 0.8 + 26;
+  ctx.fillText(sentenceCase(note.eyebrow), PAD, y + eyebrowSize * 0.85);
+  y += eyebrowSize * 0.85 + 24;
 
-  // Titre : Anton, jusqu'à 2 lignes, la taille s'adapte
-  const title = fit(ctx, note.title, 400, display, maxW, 190, 2, 1, 96, 56);
+  // Titre : Frigg Café, jusqu'à 2 lignes, la taille s'adapte
+  const titleLineHeight = 1.08;
+  const title = fit(ctx, note.title, 400, display, maxW, 200, 2, titleLineHeight, 108, 64);
   ctx.font = `400 ${title.size}px ${display}`;
   ctx.fillStyle = `rgb(${INK})`;
   title.lines.forEach((line, n) => {
-    ctx.fillText(line, PAD, y + title.size * 0.92 + n * title.size);
+    ctx.fillText(line, PAD, y + title.size * 0.92 + n * title.size * titleLineHeight);
   });
-  y += title.lines.length * title.size;
+  y += title.lines.length * title.size * titleLineHeight;
 
   // Filet
   ctx.shadowColor = "transparent";
-  ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-  ctx.fillRect(PAD, y + 16, 72, 2);
-  y += 16 + 2 + 30;
-  ctx.shadowColor = "rgba(0, 0, 0, 0.35)";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.48)";
+  ctx.fillRect(PAD, y + 14, 72, 2);
+  y += 14 + 2 + 26;
+  ctx.shadowColor = "rgba(0, 0, 0, 0.72)";
 
   // Pied de carte, calé en bas
   const footY = H - PAD;
@@ -148,11 +150,12 @@ export function drawGlassText(canvas: HTMLCanvasElement, note: Note) {
   ctx.fillText(note.foot, PAD, footY);
 
   // Corps : prend la place restante entre le filet et le pied
-  const bodyBottom = footY - footSize - 28;
-  const body = fit(ctx, note.body, 400, bodyFamily, maxW, bodyBottom - y, 6, 1.25, 44, 26);
+  const bodyBottom = footY - footSize - 24;
+  const bodyLineHeight = 1.24;
+  const body = fit(ctx, note.body, 400, bodyFamily, maxW, bodyBottom - y, 6, bodyLineHeight, 46, 30);
   ctx.font = `400 ${body.size}px ${bodyFamily}`;
-  ctx.fillStyle = `rgba(${INK}, ${MUTED + 0.1})`;
+  ctx.fillStyle = `rgba(${INK}, ${BODY_ALPHA})`;
   body.lines.forEach((line, n) => {
-    ctx.fillText(line, PAD, y + body.size * 0.95 + n * body.size * 1.25);
+    ctx.fillText(line, PAD, y + body.size * 0.95 + n * body.size * bodyLineHeight);
   });
 }

@@ -154,12 +154,12 @@ function Card({ i }: { i: number }) {
 
     if (intro) {
       // image zoomée à l'ouverture : part du centre, glisse vers sa place
-      const full = slotRect("image", i, size.width, 1);
+      const full = slotRect("image", i, size.width, 1, size.height);
       m.scale.set(full.w * zoom, full.h * zoom, 1);
       m.position.set(full.x * spread, full.y * spread, 0);
       u.uOpacity.value = MathUtils.clamp((3.2 - zoom) * 1.5, 0, 1);
     } else {
-      const r = slotRect("image", i, size.width, spread);
+      const r = slotRect("image", i, size.width, spread, size.height);
       m.position.set(r.x, r.y, 0);
       m.scale.set(r.w, r.h, 1);
       u.uOpacity.value = spread;

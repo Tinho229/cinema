@@ -1,23 +1,8 @@
 /* Disposition du carrousel, partagée par la scène WebGL (Showcase3D),
    les verres (GlassSlot) et le calque HTML (ShowcaseLayer : cadre, légende).
 
-   Une seule rangée centrée sur l'écran : les images occupent la moitié
-   gauche, les verres la moitié droite. L'indice 0 est collé au centre, les
-   suivants s'éloignent vers les bords et finissent par sortir de l'écran
-   (la lentille courbe ces cartes de bord) :
-
-       [3] [2] [1] [0]  |  [0] [1] [2] [3]
-            IMAGES            VERRES
-
-   L'image j et le verre j montrent toujours le même projet. Rien ne bouge :
-   le défilement (showcaseState.step) fait tourner le projet affiché dans
-   chaque emplacement. Entre deux entiers, step = k + t, t (0 → 1) pilote la
-   transition (verres qui se brisent, images qui changent par colonnes).
-
-   Pour ajouter une histoire : ajoute une entrée dans PROJECTS
-   (showcaseContent.ts), tout le reste suit.
-   Sur mobile (< 768 px) la rangée d'images passe au-dessus de celle des
-   verres ; chaque rangée montre ses deux premières cartes. */
+   Desktop / paysage : une rangée centrée sur l'écran (images à gauche, verres à droite).
+   Mobile portrait : rangée d'images en haut, rangée de verres en bas, carte active centrée. */
 import { PROJECTS } from "./showcaseContent";
 
 export const N_PROJECTS = PROJECTS.length;
@@ -33,7 +18,7 @@ export const FOCUS = 0;
 
 export const LAYOUT = {
   w: 0.24, //        largeur d'une carte / largeur d'écran (desktop)
-  wMobile: 0.42, //  idem sur mobile
+  wMobile: 0.80, //  idem sur mobile portrait (carte active lisible et centrée)
   gap: 0.07, //      espace entre cartes, en largeur de carte
   mid: 0.03, //      espace entre la dernière image et le premier verre, en largeur d'écran
   ky: 0.06, //       hauteur supplémentaire vers les côtés (lentille)
@@ -44,36 +29,57 @@ export type Kind = "image" | "glass";
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-function metrics(W: number) {
-  const mobile = W < 768;
-  const w = W * (mobile ? LAYOUT.wMobile : LAYOUT.w);
+export function isStackedViewport(W: number, H = 900) {
+  return W < 560 || (W < 768 && H >= W * 0.9);
+}
+
+function metrics(W: number, H = 900) {
+  const stacked = isStackedViewport(W, H);
+  let w: number;
+  if (stacked) {
+    // Sur mobile portrait : carte large (~80 % largeur) bornée par la hauteur disponible
+    // pour loger la rangée images, la légende au centre et la rangée verres.
+    const maxByHeight = Math.max(180, (H - 124) * 0.42 * CARD_ASPECT);
+    w = Math.min(W * LAYOUT.wMobile, maxByHeight);
+  } else if (W < 1200) {
+    // Tablette / petit écran / mobile paysage : agrandit la carte proportionnellement
+    // pour préserver la lisibilité des textes dans les verres, borné par la hauteur.
+    const t = Math.max(0, Math.min(1, (W - 768) / (1200 - 768)));
+    const ratio = W < 768 ? 0.34 : lerp(0.33, LAYOUT.w, t);
+    const maxByHeight = Math.max(160, H * 0.56 * CARD_ASPECT);
+    w = Math.min(W * ratio, maxByHeight);
+  } else {
+    const maxByHeight = Math.max(240, H * 0.62 * CARD_ASPECT);
+    w = Math.min(W * LAYOUT.w, maxByHeight);
+  }
   const h = w / CARD_ASPECT;
   const g = w * LAYOUT.gap;
-  return { mobile, w, h, g, pitch: w + g };
+  const rowGap = stacked ? Math.min(Math.max(H * 0.11, 68), 96) : 0;
+  return { stacked, w, h, g, pitch: w + g, rowGap };
 }
 
 /** Zone d'un côté, en px, origine au centre de l'écran, y vers le haut.
     Sert à centrer la légende et les filtres : desktop = moitié d'écran
-    visible, mobile = une rangée pleine largeur. */
-export function blockRect(kind: Kind, W: number) {
-  const m = metrics(W);
-  if (!m.mobile) {
+    visible, mobile portrait = une rangée pleine largeur. */
+export function blockRect(kind: Kind, W: number, H = 900) {
+  const m = metrics(W, H);
+  if (!m.stacked) {
     return { x: (kind === "image" ? -1 : 1) * W * 0.25, y: 0, w: W * 0.45, h: m.h };
   }
-  const off = m.h / 2 + m.h * 0.55;
+  const off = m.h / 2 + m.rowGap / 2;
   return { x: 0, y: (kind === "image" ? 1 : -1) * off, w: W * 0.9, h: m.h };
 }
 
 /** Place et taille (px, origine au centre, y vers le haut) de la carte `index`
     d'un côté. `spread` : 0 = rassemblées vers le centre, 1 = en place. */
-export function slotRect(kind: Kind, index: number, W: number, spread = 1) {
-  const m = metrics(W);
+export function slotRect(kind: Kind, index: number, W: number, spread = 1, H = 900) {
+  const m = metrics(W, H);
   let x: number;
   let y = 0;
-  if (m.mobile) {
-    // les deux premières cartes de part et d'autre du centre, la suite sort à droite
-    x = (index - 0.5) * m.pitch;
-    y = blockRect(kind, W).y;
+  if (m.stacked) {
+    // La carte active (index 0) est centrée ; la suivante amorce la file à droite
+    x = index * m.pitch;
+    y = blockRect(kind, W, H).y;
   } else {
     const side = kind === "image" ? -1 : 1;
     x = side * (W * LAYOUT.mid * 0.5 + m.w / 2 + index * m.pitch);

@@ -1,0 +1,63 @@
+/* ================================
+   TEXT REVEAL
+   Chaque mot est dans un masque (.rt-w) ; le mot (.rt-i) monte à l'intérieur.
+   - GSAP (addTextReveal) pilote .rt-i dans les timelines scrubbées
+   - le mode "auto" joue tout seul à l'apparition (éléments montés après coup)
+================================ */
+
+.rt-w {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    /* marge de respiration : ne coupe ni les jambages ni les accents */
+    padding: 0.18em 0;
+    margin: -0.18em 0;
+}
+
+.rt-i {
+    display: inline-block;
+    will-change: transform;
+}
+
+/* ---- mode auto ---- */
+.rt--auto .rt-i {
+    animation: rt-up 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--d, 0ms) + var(--k, 0) * 45ms);
+}
+
+@keyframes rt-up {
+    from {
+        transform: translateY(115%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+/* ---- texte qui change (légende du carrousel) ---- */
+.rt-pop {
+    animation: rt-pop 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes rt-pop {
+    from {
+        opacity: 0;
+        transform: translateY(40%);
+        filter: blur(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+        filter: blur(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .rt--auto .rt-i,
+    .rt-pop {
+        animation: none;
+    }
+}

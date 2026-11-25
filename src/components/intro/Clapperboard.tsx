@@ -146,8 +146,7 @@ export function Clapperboard() {
     if (!g || !a) return;
 
     // Responsive + animation d'intro (GSAP via introState)
-    // Dans useFrame, remplace la ligne du fit par :
-    const fit = Math.min(1.05, viewport.width * 0.24) * SIZE;
+    const fit = Math.min(1.05, viewport.width * 0.24, viewport.height * 0.23) * SIZE;
     const s = Math.max(introState.scale * fit, 0.0001);
     g.visible = introState.scale > 0.01;
     g.scale.setScalar(s);
@@ -157,7 +156,7 @@ export function Clapperboard() {
 
     // Centré, de face, aucune inclinaison
     g.rotation.set(0, 0, 0);
-    g.position.set(0, -0.35, 0);
+    g.position.set(0, viewport.width < 4 ? -0.14 : -0.35, 0);
     g.position.y += Math.sin(state.clock.elapsedTime * 1.05) * 0.008;
   });
 

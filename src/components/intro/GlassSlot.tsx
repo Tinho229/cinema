@@ -17,7 +17,7 @@ import {
 import { HERO_DIM, showcaseState } from "@/lib/showcaseState";
 import { N_PROJECTS, projectAt, slotRect, transition } from "@/lib/showcaseLayout";
 import { PROJECTS, type Note } from "@/lib/showcaseContent";
-import { drawGlassText, GLASS_TEXT_H, GLASS_TEXT_W } from "@/lib/glassText";
+import { drawGlassText, GLASS_TEXT_H, GLASS_TEXT_W, loadGlassFonts } from "@/lib/glassText";
 
 /* ------------------------------------------------------------------
    Verre dépoli dessiné DANS la scène WebGL (voir la version précédente
@@ -143,8 +143,8 @@ void main() {
   vec3 col = backdrop(bgUv) * uTint * uBgAlpha;
 
   float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
-  col = mix(vec3(lum), col, 1.5) * 1.3;
-  col += vec3(0.95, 0.97, 1.0) * 0.03;
+  col = mix(vec3(lum), col, 1.35) * 0.88;
+  col = mix(col, vec3(0.03, 0.03, 0.04), 0.24);
 
   // --- profondeur
   float diag = 0.5 * (g.x + (1.0 - g.y));
@@ -233,7 +233,7 @@ function getNoteTexture(note: Note): CanvasTexture {
     t.needsUpdate = true;
   };
   paint();
-  document.fonts?.ready.then(paint);
+  loadGlassFonts().then(paint);
 
   noteTextures.set(note, t);
   return t;
@@ -296,7 +296,7 @@ export function GlassSlot({ i, project, phase = 0 }: Props) {
     m.visible = spread > 0.001;
     if (!m.visible) return;
 
-    const slot = slotRect("glass", i, size.width, spread);
+    const slot = slotRect("glass", i, size.width, spread, size.height);
     const pad = slot.h * 0.14;
     m.position.set(slot.x, slot.y, 0);
     m.scale.set(slot.w + pad * 2, slot.h + pad * 2, 1);

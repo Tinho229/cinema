@@ -1,92 +1,92 @@
 :root {
-    --tx-ink: #f4f1ea;
-    --tx-muted: rgb(244 241 234 / 0.58);
-    --tx-display: var(--font-display), Impact, "Arial Narrow Bold", sans-serif;
+  --tx-ink: #f4f1ea;
+  --tx-muted: rgb(244 241 234 / 0.78);
+  --tx-display: var(--font-display), Georgia, serif;
 }
 
-/* ---- Titres (Anton) ---- */
+/* ---- Titres (Frigg Café) ---- */
 .tx-display {
-    font-family: var(--tx-display);
-    font-weight: 400;
-    line-height: 0.98;
-    letter-spacing: -0.005em;
-    color: var(--tx-ink);
+  font-family: var(--tx-display);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: 0;
+  color: var(--tx-ink);
 }
 
 .tx-hero-title {
-    font-size: clamp(34px, 4vw, 56px);
+  font-size: clamp(34px, 4.4vw, 60px);
 }
 
 .tx-name {
-    font-size: 22px;
-    line-height: 1.1;
+  font-size: clamp(19px, 1.5vw, 24px);
+  line-height: 1.15;
 }
 
-/* ---- Surtitre : petit, atténué, sans capitales espacées ---- */
+/* ---- Surtitre ---- */
 .tx-eyebrow {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 400;
-    letter-spacing: 0;
-    text-transform: none;
-    color: var(--tx-muted);
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--tx-muted);
 }
 
-/* ---- Libellé / valeur (les tailles restent celles du parent) ---- */
+/* ---- Libellé / valeur ---- */
 .tx-label {
-    color: var(--tx-muted);
-    letter-spacing: -0.01em;
+  color: var(--tx-muted);
+  letter-spacing: 0;
 }
 
 .tx-value {
-    color: var(--tx-ink);
-    font-weight: 500;
-    letter-spacing: -0.01em;
+  color: var(--tx-ink);
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
-/* ---- Footer : on cible par éléments, sans connaître ContactFooter.css ---- */
+/* ---- Footer ---- */
 .footer-layer .contact-footer :is(h1, h2, h3, h4) {
-    font-family: var(--tx-display);
-    font-weight: 400;
-    line-height: 0.98;
-    letter-spacing: -0.005em;
-    text-transform: none;
-    color: var(--tx-ink);
+  font-family: var(--tx-display);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--tx-ink);
 }
 
 .footer-layer .contact-footer :is(p, li, small, label, dt) {
-    letter-spacing: -0.01em;
-    color: var(--tx-muted);
+  letter-spacing: 0;
+  color: var(--tx-muted);
 }
 
 .footer-layer .contact-footer :is(strong, b) {
-    font-weight: 400;
-    color: var(--tx-ink);
+  font-weight: 500;
+  color: var(--tx-ink);
 }
 
-/* ---- Cartes cast / crédits (verre HTML) ---- */
+/* ---- Cartes cast / crédits ---- */
 .cast-card h2 {
-    font-family: var(--tx-display);
-    font-weight: 400;
-    line-height: 1;
-    letter-spacing: -0.005em;
-    color: var(--tx-ink);
+  font-family: var(--tx-display);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: 0;
+  color: var(--tx-ink);
 }
 
 .cast-card .cast-overline {
-    letter-spacing: 0;
-    text-transform: none;
-    color: var(--tx-muted);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--tx-muted);
 }
 
 .cast-card .cast-person {
-    letter-spacing: -0.01em;
-    color: var(--tx-ink);
+  letter-spacing: 0;
+  color: var(--tx-ink);
 }
 
 .cast-card .cast-footer span,
 .cast-card .cast-person-index {
-    letter-spacing: 0;
-    text-transform: none;
-    color: var(--tx-muted);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--tx-muted);
 }

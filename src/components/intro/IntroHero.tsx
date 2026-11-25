@@ -65,7 +65,7 @@ function Line({ text, className = "" }: { text: string; className?: string }) {
 export function IntroHero() {
   const root = useRef<HTMLElement>(null);
   const [done, setDone] = useState(false);
-  const [run, setRun] = useState(0);
+  const [run] = useState(0);
   const [webgl, setWebgl] = useState(false);
   const tiles = useMemo(() => buildTiles(), []);
 
@@ -225,48 +225,74 @@ export function IntroHero() {
         {webgl && !done && <Scene3D />}
       </div>
 
-      <aside className="glass-panel glass-tr top-4 right-4 w-[min(82vw,300px)] p-4 md:top-8 md:right-8 md:p-6">
-        <div className="space-y-3 text-[10px] md:text-xs">
+      <aside className="glass-panel glass-tr top-3 right-3 w-[min(86vw,290px)] p-4 sm:top-5 sm:right-5 md:top-8 md:right-8 md:w-[min(86vw,320px)] md:p-6">
+        <div className="space-y-3">
           <div>
-            <Line text="Technique production" className="text-[#c8c4bc]" />
-            <Line text="XXX XXX" className="mt-1 font-medium" />
+            <Line
+              text="Technique production"
+              className="text-xs font-medium text-[#f4f1ea]/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] md:text-[13px]"
+            />
+            <Line
+              text="XXX XXX"
+              className="tx-display mt-1 text-[15px] leading-snug text-[#f4f1ea] drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)] md:text-base"
+            />
           </div>
           <div>
-            <Line text="Co-réalisation" className="text-[#c8c4bc]" />
-            <Line text="XXX XXX / XXX XXX" className="mt-1 font-medium" />
+            <Line
+              text="Co-réalisation"
+              className="text-xs font-medium text-[#f4f1ea]/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] md:text-[13px]"
+            />
+            <Line
+              text="XXX XXX / XXX XXX"
+              className="tx-display mt-1 text-[15px] leading-snug text-[#f4f1ea] drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)] md:text-base"
+            />
           </div>
           <div>
-            <Line text="Directeur technique" className="text-[#c8c4bc]" />
-            <Line text="XXX XXX" className="mt-1 font-medium" />
+            <Line
+              text="Directeur technique"
+              className="text-xs font-medium text-[#f4f1ea]/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] md:text-[13px]"
+            />
+            <Line
+              text="XXX XXX"
+              className="tx-display mt-1 text-[15px] leading-snug text-[#f4f1ea] drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)] md:text-base"
+            />
           </div>
         </div>
       </aside>
 
-      <aside className="glass-panel glass-bl bottom-4 left-4 w-[min(78vw,250px)] p-4 md:bottom-8 md:left-8 md:p-6">
-        <Line text="Acteurs principaux" className="text-[10px] text-[#c8c4bc] md:text-xs" />
-        <ul className="mt-3 space-y-2">
+      <aside className="glass-panel glass-bl bottom-3 left-3 w-[min(82vw,280px)] p-4 sm:bottom-5 sm:left-5 md:bottom-8 md:left-8 md:p-6">
+        <Line
+          text="Acteurs principaux"
+          className="text-xs font-medium text-[#f4f1ea]/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] md:text-[13px]"
+        />
+        <ul className="mt-2.5 space-y-1.5 md:mt-3 md:space-y-2">
           {["XXX XXX", "XXX XXX", "XXX XXX"].map((name, i) => (
             <li key={i}>
-              <Line text={name} className="text-xs font-medium md:text-sm" />
+              <Line
+                text={name}
+                className="tx-display text-base leading-snug text-[#f4f1ea] drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)] md:text-lg"
+              />
             </li>
           ))}
         </ul>
       </aside>
 
-      <div className="title-end pointer-events-none absolute bottom-8 left-1/2 z-20 -translate-x-1/2 text-center">
-        <p className="text-3xl font-semibold tracking-tight md:text-5xl">
+      <div className="title-end pointer-events-none absolute inset-x-4 bottom-16 z-20 mx-auto max-w-2xl text-center md:bottom-8">
+        <p className="tx-display text-[clamp(34px,9vw,60px)] leading-[1.06] text-[#f4f1ea] [text-shadow:0_2px_20px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.95)]">
           Ligne de fuite
         </p>
-        <p className="mt-2 text-[10px] tracking-[0.28em] text-[#c8c4bc] uppercase">
+        <p className="mt-2 text-xs font-medium tracking-[0.22em] text-[#f4f1ea]/90 uppercase [text-shadow:0_1px_10px_rgba(0,0,0,0.95)] md:text-[13px]">
           Scène 01 — Prise 01
         </p>
       </div>
 
       {/* Invite à défiler, visible quand l'intro est terminée */}
       {done && (
-        <div className="scroll-hint pointer-events-none absolute right-6 bottom-8 z-20 flex items-center gap-3 text-xs text-[#c8c4bc] md:right-8">
-          <span>Faites défiler</span>
-          <span className="h-px w-10 animate-pulse bg-[#c8c4bc]" />
+        <div className="scroll-hint pointer-events-none absolute inset-x-0 bottom-4 z-20 flex items-center justify-center md:inset-x-auto md:right-8 md:bottom-8 md:justify-end">
+          <div className="flex items-center gap-3 rounded-full border border-white/15 bg-black/50 px-3.5 py-1.5 text-xs font-medium text-[#f4f1ea] backdrop-blur-sm">
+            <span>Faites défiler</span>
+            <span className="h-px w-8 animate-pulse bg-[#f4f1ea]/85 md:w-10" />
+          </div>
         </div>
       )}
 

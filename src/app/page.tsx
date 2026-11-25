@@ -1,4 +1,3 @@
-import ContactFooter from "@/components/ContactFooter/ContactFooter";
 import { IntroHero } from "@/components/intro/IntroHero";
 import SmoothScroll from "@/components/SmoothScroll";
 

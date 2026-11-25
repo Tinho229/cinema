@@ -1,4 +1,5 @@
 import { gsap } from "@/lib/gsap";
+import { addTextReveal, prefersReducedMotion } from "@/lib/textReveal";
 
 /* Durées en unités de timeline (1 unité = SCROLL_PER_UNIT % d'écran de scroll,
    voir ShowcaseLayer.tsx). Plus grand = plus de scroll pour la même animation. */
@@ -8,6 +9,7 @@ export const GALLERY_TIMING = {
   rise: 1.6, //  chaque carte suivante monte du bas, texte + image ensemble
   exit: 2, //    la section repart vers le haut
   overlap: 0.45, // part de la sortie après laquelle ShowcaseLayer démarre
+  media: 1.4, // révélation d'une image : rideau + zoom arrière
 } as const;
 
 /**
@@ -15,7 +17,8 @@ export const GALLERY_TIMING = {
  *   1. la section qui monte du bas vers le haut (1re carte incluse)
  *   2. les cartes suivantes, une par une, du bas vers le haut
  *   3. la sortie de la section vers le haut
- * et renvoie l'instant où la scène des images doit démarrer.
+ * + l'animation des images de témoignage et celle des textes.
+ * Renvoie l'instant où la scène des images doit démarrer.
  * À appeler dans le gsap.context de ShowcaseLayer, AVANT les autres tweens.
  */
 export function addGalleryTimeline(tl: gsap.core.Timeline, root: HTMLElement) {
@@ -29,8 +32,31 @@ export function addGalleryTimeline(tl: gsap.core.Timeline, root: HTMLElement) {
     return { showcaseAt: 0 };
   }
 
-  const { enter, hold, rise, exit, overlap } = GALLERY_TIMING;
+  const { enter, hold, rise, exit, overlap, media } = GALLERY_TIMING;
   const cards = gsap.utils.toArray<HTMLElement>(".tg-card", layer);
+  const calm = prefersReducedMotion();
+
+  /* Image d'une carte : le cadre s'ouvre en rideau (du bas vers le haut) pendant
+     que l'image revient de plus loin (zoom 1.45 -> 1) en remontant légèrement. */
+  const revealImage = (card: HTMLElement, at: number) => {
+    if (calm) return;
+    const frame = card.querySelector<HTMLElement>(".tg-card__media");
+    const img = frame?.querySelector<HTMLElement>("img");
+    if (!frame || !img) return;
+
+    tl.fromTo(
+      frame,
+      { clipPath: "inset(100% 0% 0% 0%)" },
+      { clipPath: "inset(0% 0% 0% 0%)", duration: media, ease: "power4.inOut" },
+      at
+    );
+    tl.fromTo(
+      img,
+      { scale: 1.45, yPercent: 8 },
+      { scale: 1, yPercent: 0, duration: media * 1.35, ease: "power3.out" },
+      at
+    );
+  };
 
   // 1. la section (fond, titre, 1re carte) monte d'un seul bloc
   tl.fromTo(layer, { yPercent: 100 }, { yPercent: 0, duration: enter, ease: "power3.out" }, 0);
@@ -40,10 +66,38 @@ export function addGalleryTimeline(tl: gsap.core.Timeline, root: HTMLElement) {
   // (yPercent 100) et monte avec le scroll.
   tl.set(layer, { visibility: "visible" }, 0);
 
+  // Textes de la colonne de gauche + image et texte de la 1re carte
+  addTextReveal(tl, layer.querySelector(".tg-left"), enter * 0.4, { duration: 1, amount: 0.9 });
+  if (cards[0]) {
+    revealImage(cards[0], enter * 0.35);
+    addTextReveal(tl, cards[0].querySelector(".tg-card__text"), enter * 0.55, {
+      duration: 0.9,
+      amount: 0.6,
+    });
+  }
+
   // 2. chaque carte suivante : texte et image dans le même élément, donc ensemble
   let t = enter + hold;
-  cards.slice(1).forEach((card) => {
+  cards.slice(1).forEach((card, n) => {
     tl.fromTo(card, { yPercent: 115 }, { yPercent: 0, duration: rise, ease: "power2.inOut" }, t);
+
+    revealImage(card, t + rise * 0.3);
+    addTextReveal(tl, card.querySelector(".tg-card__text"), t + rise * 0.45, {
+      duration: 0.9,
+      amount: 0.5,
+    });
+
+    // profondeur : la carte du dessous recule un peu pendant que la suivante la recouvre
+    const prev = cards[n].querySelector<HTMLElement>(".tg-card__media img");
+    if (prev && !calm) {
+      tl.fromTo(
+        prev,
+        { scale: 1 },
+        { scale: 1.08, duration: rise, ease: "none", immediateRender: false },
+        t
+      );
+    }
+
     t += rise + hold;
   });
 

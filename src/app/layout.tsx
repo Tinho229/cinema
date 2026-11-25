@@ -1,13 +1,18 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { body, display } from "@/lib/fonts";
 
 import "./globals.css";
-import { display } from "@/lib/fonts";
 import "./typography.css";
-//import "./glass-card.css";
 
 export const metadata: Metadata = {
   title: "Cinema Experience",
   description: "Une expérience cinématographique immersive.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -16,8 +21,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
-      <body  className={`${display.variable}`}>{children}</body>
+    <html lang="fr" className={`${display.variable} ${body.variable}`}>
+      <body className={`${display.variable} ${body.variable} ${body.className}`}>
+        {children}
+      </body>
     </html>
   );
 }

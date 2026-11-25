@@ -1,4 +1,3 @@
-
 /* ================================
    MAIN GRID
 ================================ */
@@ -7,16 +6,22 @@
   width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
+  align-items: stretch;
   gap: 16px;
   padding: 16px;
-  
   color: #e9e4da;
-  font-family: var(--font-body, Arial, sans-serif);
+  font-family: var(--font-body), Arial, sans-serif;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.72);
 }
 
 .contact-footer a {
   color: inherit;
   text-decoration: none;
+}
+
+.contact-footer a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .cf-visual,
@@ -27,7 +32,7 @@
   min-width: 0;
   overflow: hidden;
   border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* ================================
@@ -38,7 +43,7 @@
   position: relative;
   isolation: isolate;
   min-width: 0;
-  min-height: 650px;
+  min-height: min(650px, calc(100dvh - 32px));
   overflow: hidden;
   border-radius: 18px;
   background: #262621;
@@ -46,16 +51,13 @@
 
 /* Image confinée dans le conteneur */
 .cf-visual__image {
-  .cf-visual__image {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      /* remplit la carte sans déformer */
-      object-position: center;
-      z-index: 0;
-    }
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
 }
 
 /* Overlay */
@@ -71,7 +73,6 @@
   pointer-events: none;
 }
 
-
 .cf-visual__title {
   position: absolute;
   left: 55px;
@@ -79,11 +80,11 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display), Georgia, serif;
   font-weight: 400;
   font-size: clamp(70px, 8vw, 115px);
-  line-height: 0.82;
-  letter-spacing: -0.055em;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
 }
 
 .cf-visual__title span {
@@ -97,7 +98,7 @@
 .cf-right {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  grid-template-rows: 280px 280px 60px;
+  grid-template-rows: minmax(260px, 1fr) minmax(260px, 1fr) 60px;
   gap: 16px;
   min-width: 0;
 }
@@ -109,40 +110,43 @@
 .cf-opening {
   grid-column: 1;
   grid-row: 1;
-  padding: 32px 24px;
+  padding: 24px;
 }
 
 .cf-card {
-  background: transparent
+  background: transparent;
 }
 
 .cf-card__title {
   margin: 0;
   text-align: center;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display), Georgia, serif;
   font-weight: 400;
-  font-size: 26px;
+  font-size: clamp(22px, 1.9vw, 26px);
+  line-height: 1.1;
+  color: #f4f1ea;
 }
 
 /* Opening hours */
 .cf-opening__list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-top: 24px;
+  gap: 12px;
+  margin-top: 18px;
 }
 
 .cf-opening__row {
   display: grid;
-  grid-template-columns: 48px minmax(12px, 1fr) auto;
+  grid-template-columns: 66px minmax(10px, 1fr) auto;
   align-items: center;
   gap: 8px;
   font-size: 13px;
+  color: #f4f1ea;
 }
 
 .cf-opening__dots {
   height: 1px;
-  border-bottom: 1px dotted rgba(255, 255, 255, 0.2);
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.28);
 }
 
 /* ================================
@@ -165,7 +169,7 @@
   position: relative;
   overflow: hidden;
   border-radius: 18px;
-  background: transparent
+  background: transparent;
 }
 
 .cf-gallery__item img {
@@ -179,6 +183,7 @@
 .cf-map {
   grid-column: 1;
   grid-row: 2;
+  min-height: 240px;
 }
 
 .cf-map iframe {
@@ -197,27 +202,29 @@
 .cf-contact {
   grid-column: 2;
   grid-row: 2;
-  padding: 32px 24px;
+  padding: 24px;
 }
 
 .cf-contact__list {
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  margin-top: 28px;
+  gap: 18px;
+  margin-top: 18px;
 }
 
 .cf-contact__row {
   display: grid;
-  grid-template-columns: 80px minmax(0, 1fr);
+  grid-template-columns: 76px minmax(0, 1fr);
   gap: 12px;
   align-items: start;
   font-size: 13px;
+  color: #f4f1ea;
 }
 
 .cf-contact__label {
-  font-size: 10px;
-  letter-spacing: 1px;
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  color: rgba(244, 241, 234, 0.78);
 }
 
 .cf-contact__value {
@@ -252,13 +259,49 @@
   justify-content: flex-end;
   gap: 32px;
   padding: 0 24px;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.7px;
+  color: rgba(244, 241, 234, 0.85);
 }
 
 .cf-legal__links {
   display: flex;
   gap: 24px;
+}
+
+@media (max-height: 760px) and (min-width: 1101px) {
+  .contact-footer {
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .cf-visual {
+    min-height: calc(100dvh - 24px);
+  }
+
+  .cf-right {
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) 52px;
+    gap: 12px;
+  }
+
+  .cf-opening,
+  .cf-contact {
+    padding: 18px 20px;
+  }
+
+  .cf-opening__list {
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .cf-contact__list {
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  .cf-map {
+    min-height: 0;
+  }
 }
 
 /* ================================
@@ -271,12 +314,12 @@
   }
 
   .cf-visual {
-    min-height: 600px;
-    background: transparent
+    min-height: clamp(320px, 48dvh, 560px);
+    background: transparent;
   }
 
   .cf-right {
-    grid-template-rows: 260px 260px 60px;
+    grid-template-rows: minmax(260px, auto) minmax(260px, auto) 60px;
   }
 }
 
@@ -291,61 +334,35 @@
   }
 
   .cf-visual {
-    min-height: 520px;
+    min-height: clamp(240px, 38dvh, 400px);
     border-radius: 14px;
-  }
-
-  .cf-nav {
-    top: 20px;
-    left: 20px;
-    right: 20px;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 12px;
-  }
-
-  .cf-nav__brand {
-    font-size: 22px;
-  }
-
-  .cf-nav__links {
-    gap: 12px;
-  }
-
-  .cf-nav__links a {
-    font-size: 9px;
-  }
-
-  .cf-nav__links a:first-child,
-  .cf-nav__links a:nth-child(2) {
-    display: none;
   }
 
   .cf-visual__title {
     left: 24px;
     bottom: 35px;
-    font-size: clamp(65px, 17vw, 105px);
+    font-size: clamp(56px, 15vw, 96px);
   }
 
   .cf-right {
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: minmax(240px, auto) 200px minmax(260px, auto) 55px;
+    grid-template-rows: minmax(230px, auto) minmax(230px, auto) 54px;
     gap: 10px;
   }
 
   .cf-opening {
-    padding: 20px 12px;
+    padding: 18px 12px;
   }
 
   .cf-opening__list {
-    gap: 12px;
-    margin-top: 22px;
+    gap: 11px;
+    margin-top: 18px;
   }
 
   .cf-opening__row {
-    font-size: 10px;
-    grid-template-columns: 35px minmax(5px, 1fr) auto;
-    gap: 5px;
+    font-size: 12px;
+    grid-template-columns: 60px minmax(6px, 1fr) auto;
+    gap: 6px;
   }
 
   .cf-card__title {
@@ -362,22 +379,26 @@
 
   .cf-map,
   .cf-contact {
-    grid-row: 3;
+    grid-row: 2;
+  }
+
+  .cf-map {
+    min-height: 220px;
   }
 
   .cf-contact {
-    padding: 20px 12px;
+    padding: 18px 12px;
   }
 
   .cf-contact__list {
-    gap: 20px;
-    margin-top: 24px;
+    gap: 16px;
+    margin-top: 18px;
   }
 
   .cf-contact__row {
     grid-template-columns: 1fr;
-    gap: 8px;
-    font-size: 11px;
+    gap: 5px;
+    font-size: 12px;
   }
 
   .cf-contact__value,
@@ -390,11 +411,11 @@
 
   .cf-legal {
     grid-column: 1 / -1;
-    grid-row: 4;
-    padding: 0 12px;
+    grid-row: 3;
+    padding: 0 14px;
     gap: 12px;
     justify-content: space-between;
-    font-size: 8px;
+    font-size: 10px;
   }
 
   .cf-legal__links {
@@ -402,97 +423,39 @@
   }
 }
 
-/*export const footerData= {
-
-  brand: "ATELIER",
-  title: "GET IN\nTOUCH",
-  menu: [ {
-    label: "MENU", href: "#menu"
+@media (max-width: 500px) {
+  .cf-right {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
   }
 
-  ,
-  {
-  label: "ABOUT", href: "#about"
+  .cf-opening,
+  .cf-map,
+  .cf-contact,
+  .cf-legal {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .cf-map {
+    min-height: 190px;
+  }
+
+  .cf-contact__row {
+    grid-template-columns: 74px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .cf-contact__value,
+  .cf-contact__row > a,
+  .cf-contact__socials {
+    align-items: flex-end;
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .cf-legal {
+    min-height: 48px;
+    padding: 10px 14px;
+  }
 }
-
-,
-{
-label: "BOOK A TABLE", href: "#booking"
-}
-
-,
-],
-
-openingTitle: "REJOIGNEZ-NOUS LE",
-openingHours: [ {
-  day: "Mon", hours: "16:00 - 22:30"
-}
-
-,
-{
-day: "Tue", hours: "16:00 - 22:30"
-}
-
-,
-{
-day: "Wed", hours: "16:00 - 22:30"
-}
-
-,
-{
-day: "Thu", hours: "16:00 - 22:30"
-}
-
-,
-{
-day: "Fri", hours: "16:00 - 22:30"
-}
-
-,
-{
-day: "Sat & Sun", hours: "16:00 - 22:30"
-}
-
-,
-],
-
-gallery: [ "/images/footer/gallery-1.jpg",
-"/images/footer/gallery-2.jpg",
-"/images/footer/gallery-3.jpg",
-"/images/footer/gallery-4.jpg",
-],
-
-mainImage: "/images/footer/main.jpg",
-
-contactTitle: "CONTACT",
-addressLabel: "ADDRESS",
-address: ["Hôtel Mavilla, Cotonou, Bénin"],
-
-phoneLabel: "PHONE",
-phone: "+229 01 97 19 83 00",
-
-emailLabel: "EMAIL",
-email: "hotelmavilla@yahoo.com",
-
-followLabel: "SITE",
-socials: [ {
-  label: "Mavilla", href: "https://hotelmavillacotonou.com"
-}
-
-],
-
-copyright: "© 2026 ATELIER",
-legal: [ {
-  label: "PRIVACY", href: "/privacy"
-}
-
-,
-{
-label: "LEGAL", href: "/legal"
-}
-
-,
-],
-}
-
-;*/
