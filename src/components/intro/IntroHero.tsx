@@ -1,6 +1,7 @@
 "use client";
 import { FooterLayer } from "./FooterLayer";
 import { ShowcaseLayer } from "./ShowcaseLayer";
+import { TransformationGallery } from "@/components/transformation/TransformationGallery";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { resetIntro, introState } from "@/lib/introState";
@@ -271,6 +272,11 @@ export function IntroHero() {
 
       <div className="flash pointer-events-none absolute inset-0 z-50 bg-[#f4f1ea]" />
       <ShowcaseLayer />
+
+      {/* Section « Transformation gallery » : monte du bas vers le haut au premier
+          scroll, AVANT la scène des images (la timeline est dans ShowcaseLayer).
+          z-65 : au-dessus des images, sous le footer. */}
+      <TransformationGallery />
 
       {/* Footer : au-dessus de tout, révélé par colonnes à la fin du scroll
           (la timeline est dans ShowcaseLayer). */}
