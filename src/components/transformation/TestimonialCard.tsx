@@ -49,7 +49,12 @@ export function TestimonialCard({ item, index }: { item: Testimonial; index: num
       </div>
 
       <div className="tg-card__media">
-        <img src={item.image} alt={item.alt} decoding="async" />
+        <img
+          src={item.image}
+          alt={item.alt}
+          decoding="async"
+          style={item.imagePosition ? { objectPosition: item.imagePosition } : undefined}
+        />
       </div>
     </article>
   );
