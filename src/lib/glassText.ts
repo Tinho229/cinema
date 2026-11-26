@@ -6,16 +6,16 @@ import type { Note } from "./showcaseContent";
    grain) exactement comme les images.
 
    Styles alignés sur le projet : titre Frigg Café (--font-display), surtitre et
-   corps en crème lisible (--font-body), contraste renforcé.
+   corps en crème très contrasté (--font-body).
 
-   Le canvas a le ratio d'une carte (1.6). */
-export const GLASS_TEXT_W = 1024;
+   Canvas haute définition (ratio 1.6) pour préserver la finesse des lettres. */
+export const GLASS_TEXT_W = 1408;
 export const GLASS_TEXT_H = Math.round(GLASS_TEXT_W / CARD_ASPECT);
 
-const PAD = 56;
-const INK = "244, 241, 234";
-const MUTED = 0.82;
-const BODY_ALPHA = 0.95;
+const PAD = 72;
+const INK = "250, 248, 243";
+const MUTED = 0.86;
+const BODY_ALPHA = 0.97;
 
 type Fit = { size: number; lines: string[] };
 
@@ -33,19 +33,20 @@ export function loadGlassFonts(): Promise<unknown> {
   if (typeof document === "undefined" || !document.fonts) return Promise.resolve();
   const { body, display } = families();
   return Promise.all([
-    document.fonts.load(`400 72px ${display}`).catch(() => []),
-    document.fonts.load(`400 38px ${body}`).catch(() => []),
-    document.fonts.load(`500 36px ${body}`).catch(() => []),
+    document.fonts.load(`400 84px ${display}`).catch(() => []),
+    document.fonts.load(`400 46px ${body}`).catch(() => []),
+    document.fonts.load(`500 42px ${body}`).catch(() => []),
     document.fonts.ready,
   ]);
 }
 
-/* Coupe en lignes de largeur ≤ maxW. On ne sépare que sur l'espace normal :
-   les espaces insécables du texte restent collés au mot. */
+/* Coupe en lignes de largeur ≤ maxW. On normalise les retours à la ligne
+   des chaînes multi-lignes tout en préservant les espaces insécables (\u00a0). */
 function wrap(ctx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
+  const clean = text.replace(/\s*\n\s*/g, " ").trim();
   const lines: string[] = [];
   let line = "";
-  for (const word of text.split(" ")) {
+  for (const word of clean.split(" ").filter(Boolean)) {
     const test = line ? `${line} ${word}` : word;
     if (!line || ctx.measureText(test).width <= maxW) {
       line = test;
@@ -111,24 +112,24 @@ export function drawGlassText(canvas: HTMLCanvasElement, note: Note) {
   ctx.clearRect(0, 0, W, H);
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
-  // ombre portée marquée : garantit la lisibilité sur les zones lumineuses du verre
-  ctx.shadowColor = "rgba(0, 0, 0, 0.72)";
-  ctx.shadowBlur = 12;
+  // ombre portée fine : sépare nettement les lettres sans bavure autour des traits
+  ctx.shadowColor = "rgba(0, 0, 0, 0.82)";
+  ctx.shadowBlur = 4;
   ctx.shadowOffsetY = 2;
 
-  const eyebrowSize = 36;
-  const footSize = 32;
+  const eyebrowSize = 44;
+  const footSize = 40;
   let y = PAD;
 
-  // Surtitre : lisible, casse normale
+  // Surtitre
   ctx.font = `500 ${eyebrowSize}px ${bodyFamily}`;
   ctx.fillStyle = `rgba(${INK}, ${MUTED})`;
   ctx.fillText(sentenceCase(note.eyebrow), PAD, y + eyebrowSize * 0.85);
-  y += eyebrowSize * 0.85 + 24;
+  y += eyebrowSize * 0.85 + 26;
 
   // Titre : Frigg Café, jusqu'à 2 lignes, la taille s'adapte
   const titleLineHeight = 1.08;
-  const title = fit(ctx, note.title, 400, display, maxW, 200, 2, titleLineHeight, 108, 64);
+  const title = fit(ctx, note.title, 400, display, maxW, 250, 2, titleLineHeight, 132, 78);
   ctx.font = `400 ${title.size}px ${display}`;
   ctx.fillStyle = `rgb(${INK})`;
   title.lines.forEach((line, n) => {
@@ -138,10 +139,10 @@ export function drawGlassText(canvas: HTMLCanvasElement, note: Note) {
 
   // Filet
   ctx.shadowColor = "transparent";
-  ctx.fillStyle = "rgba(255, 255, 255, 0.48)";
-  ctx.fillRect(PAD, y + 14, 72, 2);
-  y += 14 + 2 + 26;
-  ctx.shadowColor = "rgba(0, 0, 0, 0.72)";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
+  ctx.fillRect(PAD, y + 18, 92, 3);
+  y += 18 + 3 + 30;
+  ctx.shadowColor = "rgba(0, 0, 0, 0.82)";
 
   // Pied de carte, calé en bas
   const footY = H - PAD;
@@ -150,9 +151,9 @@ export function drawGlassText(canvas: HTMLCanvasElement, note: Note) {
   ctx.fillText(note.foot, PAD, footY);
 
   // Corps : prend la place restante entre le filet et le pied
-  const bodyBottom = footY - footSize - 24;
-  const bodyLineHeight = 1.24;
-  const body = fit(ctx, note.body, 400, bodyFamily, maxW, bodyBottom - y, 6, bodyLineHeight, 46, 30);
+  const bodyBottom = footY - footSize - 30;
+  const bodyLineHeight = 1.26;
+  const body = fit(ctx, note.body, 400, bodyFamily, maxW, bodyBottom - y, 7, bodyLineHeight, 56, 36);
   ctx.font = `400 ${body.size}px ${bodyFamily}`;
   ctx.fillStyle = `rgba(${INK}, ${BODY_ALPHA})`;
   body.lines.forEach((line, n) => {

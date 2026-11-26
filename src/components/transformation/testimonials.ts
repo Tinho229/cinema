@@ -1,7 +1,7 @@
 /* Contenu de la section « Transformation gallery ».
    L'ordre = l'ordre d'arrivée : la 1re carte est celle du fond, la dernière
    arrive par-dessus. Les images sont des placeholders : remplace-les par
-   les tiennes (ex. /images/transformation/daniel.jpg). */
+   les tiennes (ex. /images/transformation/daniel.png). */
 
 export type Testimonial = {
   name: string;
@@ -25,7 +25,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
     program: "Girls' Education",
     result: "62 million girls out of school",
     duration: "Let Girls Learn · 2015",
-    image: "/images/projects/p1.jpg",
+    image: "/images/projects/c3.png",
     alt: "Daniel F. à l’entraînement",
   },
   
@@ -36,7 +36,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
     program: "Inner Strength",
     result: "Breaking Barriers",
     duration: "Believe & Rise",
-    image: "/images/projects/p3.jpg",
+    image: "/images/projects/c2.png",
     alt: "Samuel K. à l’entraînement",
   },
 
@@ -47,7 +47,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
     program: "Self-Determination",
     result: "Confidence & Independence",
     duration: "Own Your Future",
-    image: "/images/projects/p2.jpg",
+    image: "/images/projects/c1.png",
     alt: "Nadia O. à la salle",
   },
 ];

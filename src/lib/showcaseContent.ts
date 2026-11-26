@@ -18,8 +18,7 @@ export type Project = {
   note: Note;
 };
 
-/* \u00a0 = espace insécable (évite qu'un « : » tombe en début de ligne).
-   Textes provisoires : à remplacer par le vrai synopsis. */
+/* \u00a0 = espace insécable (évite qu'un « : » tombe en début de ligne). */
 export const PROJECTS: readonly Project[] = [
   {
     title: "Rimma",
@@ -28,10 +27,8 @@ export const PROJECTS: readonly Project[] = [
     note: {
       eyebrow: "SYNOPSIS",
       title: "Ligne de fuite",
-      body: `Sènan, riche héritière, choisit d’épouser Ola, un mécanicien dont elle est profondément amoureuse.
-Convaincue que l’amour peut dépasser les différences sociales, elle construit avec lui une famille
-et donne naissance à deux enfants : Fèmi et Kossi.`,
-      foot: "Synopsis  — Prise 01",
+      body: "Sènan, riche héritière, épouse Ola, un mécanicien dont elle est profondément amoureuse. Convaincue que l’amour dépasse les différences sociales, elle fonde avec lui une famille et met au monde deux enfants\u00a0: Fèmi et Kossi.",
+      foot: "Synopsis — Prise 01",
     },
   },
   {
@@ -39,12 +36,10 @@ et donne naissance à deux enfants : Fèmi et Kossi.`,
     sub: "Résidentiel complexe",
     src: "/images/projects/p2.jpg",
     note: {
-      eyebrow: "NOTE D’INTENTION",
-      title: "Faire image",
-      body: `Peu à peu, Ola révèle un visage violent et dominateur. Les disputes deviennent des scènes de peur,
-les humiliations se multiplient et les enfants assistent, impuissants, aux souffrances de leur mère.
-Ola finit par s’approprier les biens de Sènan, puis la chasse du domicile familial avec les enfants. La rue devient leur refuge.`,
-      foot: "Synopsis  — Prise 02",
+      eyebrow: "SYNOPSIS",
+      title: "La fracture",
+      body: "Peu à peu, Ola révèle un visage violent et dominateur. Les disputes deviennent des scènes de peur, les humiliations se multiplient et les enfants assistent, impuissants, aux souffrances de leur mère.",
+      foot: "Synopsis — Prise 02",
     },
   },
   {
@@ -52,40 +47,32 @@ Ola finit par s’approprier les biens de Sènan, puis la chasse du domicile fam
     sub: "Site web",
     src: "/images/projects/p3.jpg",
     note: {
-      eyebrow: "REPÉRAGES",
-      title: "Écrire à l’écran",
-      body: `Sènan doit affronter la faim, l’exclusion et l’incertitude du lendemain, tout en protégeant ses enfants. Fèmi, alors âgée de onze ans, observe les sacrifices de sa mère.
-               `,
-      foot: "Synopsie — Prise 03",
+      eyebrow: "SYNOPSIS",
+      title: "La rue pour refuge",
+      body: "Ola finit par s’approprier les biens de Sènan et la chasse du foyer avec les enfants. Sènan affronte la faim, l’exclusion et l’incertitude du lendemain sous les yeux de Fèmi, alors âgée de onze ans.",
+      foot: "Synopsis — Prise 03",
     },
   },
-
-    {
+  {
     title: "Atelier Nord",
     sub: "Direction artistique",
     src: "/images/projects/p4.jpg",
     note: {
-      eyebrow: "MONTAGE",
-      title: "Couper juste",
-      body: `Elle décide de retrouver son père et de lui demander des comptes. Son objectif est de récupérer les biens dont sa mère a été privée et de rétablir une justice longtemps refusée.`,
-      foot: "Scène 04 — Prise 04",
+      eyebrow: "SYNOPSIS",
+      title: "Demander des comptes",
+      body: "Témoin des sacrifices de sa mère, Fèmi décide de retrouver son père. Son objectif\u00a0: récupérer les biens dont Sènan a été privée et rétablir une justice longtemps refusée.",
+      foot: "Synopsis — Prise 04",
     },
-
-    
   },
-
   {
     title: "Atelier O",
     sub: "Direction artistique",
     src: "/images/projects/p5.jpg",
     note: {
-      eyebrow: "MONTAGE",
-      title: "Couper juste",
-      body: `Cette confrontation fait remonter les blessures du
-passé et pose une question essentielle : la réparation matérielle peut-elle effacer les
-conséquences de la violence ? FÈMI raconte le courage d’une mère qui refuse de se laisser détruire et la détermination d’une fille
-qui transforme les blessures de son enfance en une force de reconquête`,
-     foot: "Synopsis  — Prise 05",
+      eyebrow: "NOTE D’INTENTION",
+      title: "Force de reconquête",
+      body: "La réparation matérielle peut-elle effacer la violence\u00a0? FÈMI raconte le courage d’une mère qui refuse de se laisser détruire et la détermination d’une fille qui transforme ses blessures en reconquête.",
+      foot: "Synopsis — Prise 05",
     },
-  }
+  },
 ];

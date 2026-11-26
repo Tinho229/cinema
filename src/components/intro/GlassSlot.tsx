@@ -143,14 +143,14 @@ void main() {
   vec3 col = backdrop(bgUv) * uTint * uBgAlpha;
 
   float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
-  col = mix(vec3(lum), col, 1.35) * 0.88;
-  col = mix(col, vec3(0.03, 0.03, 0.04), 0.24);
+  col = mix(vec3(lum), col, 0.95) * 0.62;
+  col = mix(col, vec3(0.035, 0.035, 0.042), 0.50);
 
-  // --- profondeur
+  // --- profondeur (subtile pour préserver la lecture du texte)
   float diag = 0.5 * (g.x + (1.0 - g.y));
-  col += 0.05 * (1.0 - smoothstep(0.0, 0.55, length(vec2(g.x, 1.0 - g.y) * vec2(0.9, 1.3))));
-  col += vec3(0.67, 0.8, 1.0) * 0.03 * smoothstep(0.45, 1.0, diag);
-  col *= 1.0 - 0.28 * smoothstep(0.35, 1.0, diag);
+  col += 0.025 * (1.0 - smoothstep(0.0, 0.55, length(vec2(g.x, 1.0 - g.y) * vec2(0.9, 1.3))));
+  col += vec3(0.67, 0.8, 1.0) * 0.02 * smoothstep(0.45, 1.0, diag);
+  col *= 1.0 - 0.24 * smoothstep(0.35, 1.0, diag);
 
   // --- arêtes du verre (calculées sur la vraie position)
   float eTop   = 1.0 - smoothstep(0.0, 1.4, uSize.y - q.y);
@@ -164,20 +164,20 @@ void main() {
   col += vec3(1.0) * rim * spec * 0.4;
   col += 0.025 * (1.0 - smoothstep(0.0, 16.0, dEdge));
 
-  // --- reflet diagonal qui balaie la surface
+  // --- reflet diagonal qui balaie la surface (adouci pour ne pas éblouir le texte)
   float ph = fract(uTime / 9.0);
   float sc = mix(1.6, -0.45, smoothstep(0.15, 0.6, ph));
   float sw = g.x * 0.85 + (1.0 - g.y) * 0.35;
   float d1 = (sw - sc) / 0.13;
   float d2 = (sw - sc - 0.1) / 0.3;
-  col += vec3(1.0) * (exp(-d1 * d1) * 0.09 + exp(-d2 * d2) * 0.02);
+  col += vec3(1.0) * (exp(-d1 * d1) * 0.055 + exp(-d2 * d2) * 0.015);
 
   // --- arêtes des éclats : lueur claire pendant la brisure
   col += vec3(0.85, 0.92, 1.0) * crack * 0.45;
 
-  // --- texte (actuel ou suivant, carré par carré)
+  // --- texte prémultiplié : évite les halos sombres sur les bords fins des lettres
   vec4 t = mix(texture2D(tTextA, g), texture2D(tTextB, g), useB);
-  col = mix(col, t.rgb, t.a * uTextAlpha);
+  col = col * (1.0 - t.a * uTextAlpha) + t.rgb * uTextAlpha;
 
   float body = inside * alphaT;
   gl_FragColor = vec4(mix(vec3(0.0), col, body), mix(shadow, 1.0, body) * uOpacity);
@@ -185,7 +185,7 @@ void main() {
 `;
 
 /* Fond réduit une seule fois pour tous les verres. */
-const BACKDROP_W = 160;
+const BACKDROP_W = 280;
 const backdrops = new WeakMap<Texture, CanvasTexture>();
 
 function getBackdrop(hero: Texture): CanvasTexture {
@@ -226,7 +226,8 @@ function getNoteTexture(note: Note): CanvasTexture {
   canvas.height = GLASS_TEXT_H;
   const t = new CanvasTexture(canvas);
   t.colorSpace = SRGBColorSpace;
-  t.anisotropy = 4;
+  t.premultiplyAlpha = true;
+  t.anisotropy = 8;
 
   const paint = () => {
     drawGlassText(canvas, note);

@@ -184,7 +184,7 @@ function Card({ i }: { i: number }) {
 
 export function Showcase3D() {
   const lens = useMemo(
-    () => new LensEffect({ kx: 0.025, ky: LAYOUT.ky, ca: 0.012, grain: 0.1, start: LAYOUT.start }),
+    () => new LensEffect({ kx: 0.025, ky: LAYOUT.ky, ca: 0.012, grain: 0.045, start: LAYOUT.start }),
     []
   );
   return (
