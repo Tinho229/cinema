@@ -6,6 +6,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { resetIntro, introState } from "@/lib/introState";
 import { HERO_BLUR, HERO_DIM } from "@/lib/showcaseState";
+import { RevealText } from "@/components/text/RevealText";
+import { addTextReveal } from "@/lib/textReveal";
 
 import dynamic from "next/dynamic";
 
@@ -64,6 +66,7 @@ function Line({ text, className = "" }: { text: string; className?: string }) {
 
 export function IntroHero() {
   const root = useRef<HTMLElement>(null);
+  const titleEndRef = useRef<HTMLDivElement>(null);
   const [done, setDone] = useState(false);
   const [run] = useState(0);
   const [webgl, setWebgl] = useState(false);
@@ -88,6 +91,7 @@ export function IntroHero() {
       gsap.set(".frost-tile", { clipPath: "inset(0% 0% 0% 0%)" });
       gsap.set(".trait", { scaleX: 1, opacity: 0 });
       gsap.set(".title-end", { opacity: 0, y: 18 });
+      gsap.set(".title-end__line", { scaleX: 0, opacity: 0 });
       gsap.set(".flash", { opacity: 0 });
 
       const tl = gsap.timeline({
@@ -159,7 +163,13 @@ export function IntroHero() {
         after
       );
       tl.to(".trait", { opacity: 0, duration: 0.25 }, after);
-      tl.to(".title-end", { opacity: 1, y: 0, duration: 0.8 }, "-=0.25");
+      tl.to(".title-end", { opacity: 1, y: 0, duration: 0.85, ease: "power3.out" }, "-=0.25");
+      tl.to(".title-end__line", { scaleX: 1, opacity: 1, duration: 0.9, ease: "power3.inOut" }, "<+=0.08");
+      addTextReveal(tl, titleEndRef.current, "<+=0.06", {
+        duration: 0.85,
+        amount: 0.95,
+        ease: "power3.out",
+      });
     }, scope);
 
     return () => ctx.revert();
@@ -277,13 +287,31 @@ export function IntroHero() {
         </ul>
       </aside>
 
-      <div className="title-end pointer-events-none absolute inset-x-4 bottom-16 z-20 mx-auto max-w-2xl text-center md:bottom-8">
-        <p className="tx-display text-[clamp(34px,9vw,60px)] leading-[1.06] text-[#f4f1ea] [text-shadow:0_2px_20px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.95)]">
-          Ligne de fuite
-        </p>
-        <p className="mt-2 text-xs font-medium tracking-[0.22em] text-[#f4f1ea]/90 uppercase [text-shadow:0_1px_10px_rgba(0,0,0,0.95)] md:text-[13px]">
-          Scène 01 — Prise 01
-        </p>
+      <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-5 sm:px-8">
+        <div
+          ref={titleEndRef}
+          className="title-end relative mx-auto max-w-3xl px-4 py-6 text-center sm:px-10 sm:py-8"
+        >
+          {/* Halo sombre progressif pour garantir la lisibilité sur le centre lumineux */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -inset-x-8 -inset-y-6 -z-10 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(5,5,5,0.78)_0%,rgba(5,5,5,0.48)_48%,transparent_76%)] blur-xl"
+          />
+
+          <div
+            aria-hidden="true"
+            className="title-end__line mx-auto mb-4 h-px w-16 bg-gradient-to-r from-transparent via-[#f4f1ea]/80 to-transparent sm:mb-5 sm:w-24"
+          />
+
+          <p className="tx-display text-[clamp(21px,3.3vw,44px)] leading-[1.2] text-[#f4f1ea] [text-shadow:0_2px_24px_rgba(0,0,0,0.95),0_1px_6px_rgba(0,0,0,0.95)] [@media(max-height:480px)]:text-[clamp(18px,2.8vw,28px)]">
+            <RevealText text="Le 22 décembre, ta fille et toi mérite de voir à quoi ressemble une femme qui ose, qui agit et qui inspire." />
+          </p>
+
+          <div
+            aria-hidden="true"
+            className="title-end__line mx-auto mt-4 h-px w-16 bg-gradient-to-r from-transparent via-[#f4f1ea]/80 to-transparent sm:mt-5 sm:w-24"
+          />
+        </div>
       </div>
 
       {/* Invite à défiler, visible quand l'intro est terminée */}
