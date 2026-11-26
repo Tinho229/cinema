@@ -13,7 +13,7 @@ export default function ContactFooter() {
           fill
           priority
           quality={100}
-          sizes="(max-width: 1100px) 100vw, 50vw"
+          sizes="(max-width: 700px) 260px, (max-width: 1100px) 340px, 360px"
           className="cf-visual__image"
         />
 

@@ -5,7 +5,7 @@
 .contact-footer {
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: clamp(220px, min(25vw, calc((100dvh - 32px) * 726 / 1080)), 360px) minmax(0, 1fr);
   align-items: stretch;
   gap: 16px;
   padding: 16px;
@@ -42,33 +42,39 @@
 .cf-visual {
   position: relative;
   isolation: isolate;
+  align-self: center;
+  width: 100%;
   min-width: 0;
-  min-height: min(650px, calc(100dvh - 32px));
+  height: 100%;
+  min-height: 0;
+  max-height: calc(100dvh - 32px);
+  aspect-ratio: 726 / 1080;
+  aspect-ratio: 726 / 1080;
   overflow: hidden;
   border-radius: 18px;
-  background: #262621;
+  background: transparent;
 }
 
-/* Image confinée dans le conteneur */
+/* Image contenue dans le bloc */
 .cf-visual__image {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   z-index: 0;
 }
 
-/* Overlay */
+/* Overlay léger pour préserver la lisibilité de l'affiche */
 .cf-visual__overlay {
   position: absolute;
   inset: 0;
   z-index: 1;
   background: linear-gradient(
     to top,
-    rgba(0, 0, 0, 0.65),
-    transparent 65%
+    rgba(0, 0, 0, 0.14),
+    transparent 24%
   );
   pointer-events: none;
 }
@@ -235,7 +241,7 @@
   gap: 6px;
 }
 
-.cf-contact__row > a {
+.cf-contact__row>a {
   text-align: right;
   overflow-wrap: anywhere;
 }
@@ -271,15 +277,20 @@
 
 @media (max-height: 760px) and (min-width: 1101px) {
   .contact-footer {
+    grid-template-columns: clamp(220px, min(25vw, calc((100dvh - 24px) * 726 / 1080)), 360px) minmax(0, 1fr);
+    min-height: 100dvh;
+    grid-template-columns: clamp(280px, calc((100dvh - 24px) * 726 / 1080), 440px) minmax(0, 1fr);
     gap: 12px;
     padding: 12px 16px;
   }
 
   .cf-visual {
-    min-height: calc(100dvh - 24px);
+    min-height: 0;
+    max-height: calc(100dvh - 24px);
   }
 
   .cf-right {
+    min-height: calc(100dvh - 24px);
     grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) 52px;
     gap: 12px;
   }
@@ -314,7 +325,12 @@
   }
 
   .cf-visual {
-    min-height: clamp(320px, 48dvh, 560px);
+    width: min(100%, 340px);
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    margin-inline: auto;
+    aspect-ratio: 726 / 1080;
     background: transparent;
   }
 
@@ -334,7 +350,9 @@
   }
 
   .cf-visual {
-    min-height: clamp(240px, 38dvh, 400px);
+    width: min(100%, 260px);
+    height: auto;
+    min-height: 0;
     border-radius: 14px;
   }
 
@@ -402,7 +420,7 @@
   }
 
   .cf-contact__value,
-  .cf-contact__row > a,
+  .cf-contact__row>a,
   .cf-contact__socials {
     align-items: flex-start;
     justify-content: flex-start;
@@ -447,7 +465,7 @@
   }
 
   .cf-contact__value,
-  .cf-contact__row > a,
+  .cf-contact__row>a,
   .cf-contact__socials {
     align-items: flex-end;
     justify-content: flex-end;

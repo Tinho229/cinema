@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { showcaseState } from "@/lib/showcaseState";
-import { FOCUS, MAX_STEP, activeProject, blockRect, isStackedViewport, slotRect } from "@/lib/showcaseLayout";
+import { MAX_STEP, activeProject, blockRect, isStackedViewport } from "@/lib/showcaseLayout";
 import { PROJECTS } from "@/lib/showcaseContent";
 import { addGalleryTimeline } from "@/components/transformation/galleryTimeline";
 
@@ -107,14 +107,9 @@ export function ShowcaseLayer() {
       const W = el.clientWidth;
       const H = el.clientHeight;
       const stacked = isStackedViewport(W, H);
-      const fr = slotRect("image", FOCUS, W, 1, H);
       const bl = blockRect("image", W, H);
       const gl = blockRect("glass", W, H);
       const set = (k: string, v: number) => el.style.setProperty(k, `${v}px`);
-      set("--sc-fx", fr.x);
-      set("--sc-fy", -fr.y);
-      set("--sc-fw", fr.w * 1.035);
-      set("--sc-fh", fr.h * 1.035);
       set("--sc-bx", bl.x);
       set("--sc-bw", bl.w);
       set("--sc-ctop", H / 2 - bl.y + bl.h / 2 + (stacked ? 8 : 18)); // légende sous le bloc d'images
@@ -198,10 +193,10 @@ export function ShowcaseLayer() {
         tl.fromTo(showcaseState, { zoom: 3.2 }, { zoom: 1, duration: 3.2, ease: "power3.out" }, at(0.5));
         tl.fromTo(showcaseState, { spread: 0 }, { spread: 1, duration: 3, ease: "power3.out" }, at(1.6));
 
-        tl.fromTo(".sc-focus", { opacity: 0, scale: 1.25 }, { opacity: 1, scale: 1, duration: 1, ease: "power3.out" }, at(4));
         tl.fromTo(".sc-caption", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }, at(4.2));
         tl.fromTo(".sc-filters", { opacity: 0 }, { opacity: 1, duration: 0.8 }, at(4.4));
         tl.fromTo(".sc-header", { opacity: 0 }, { opacity: 1, duration: 0.8 }, at(4.4));
+        tl.fromTo(".sc-progress", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, at(4.4));
 
         // Une transition par histoire : pause, brisure / changement, pause…
         tl.to({}, { duration: 1 });
@@ -210,10 +205,29 @@ export function ShowcaseLayer() {
           tl.to({}, { duration: k === MAX_STEP ? 1.5 : 1 });
         }
 
+        // Barre de 5 boutons : se remplissent un à un sur toute la section
+        // (du début de la scène jusqu'à la dernière histoire), au rythme du scroll.
+        const dots = Array.from(el.querySelectorAll<HTMLElement>(".sc-progress-dot"));
+        const bar = { p: 0 };
+        const paintDots = () => {
+          dots.forEach((d, k) => {
+            const level = Math.min(Math.max(bar.p * dots.length - k, 0), 1);
+            d.style.setProperty("--l", level.toFixed(3));
+          });
+        };
+        paintDots();
+        tl.fromTo(
+          bar,
+          { p: 0 },
+          { p: 1, duration: tl.duration() - tl.labels.showcase, ease: "none", onUpdate: paintDots },
+          "showcase"
+        );
+
         // Le footer remplace la section des images, colonne par colonne.
         if (footer) {
           tl.addLabel("footer");
           tl.set(footer, { visibility: "visible" }, "footer");
+          tl.to(".sc-progress", { opacity: 0, duration: 0.6, ease: "power2.out" }, "footer");
           tl.to(
             wipe,
             {
@@ -282,13 +296,6 @@ export function ShowcaseLayer() {
         <Suspense fallback={null}>
           <Showcase3D />
         </Suspense>
-
-        <div className="sc-focus">
-          <i className="sc-cross tl" />
-          <i className="sc-cross tr" />
-          <i className="sc-cross bl" />
-          <i className="sc-cross br" />
-        </div>
       </div>
 
       <div className="sc-filters z-30 px-3 opacity-0">
@@ -316,6 +323,13 @@ export function ShowcaseLayer() {
         >
           {first.sub}
         </p>
+      </div>
+
+      {/* barre de 5 boutons blancs sur fond noir, liée au scroll de la section */}
+      <div className="sc-progress z-[65] opacity-0" role="progressbar" aria-label="Progression de la section Synopsis">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <span key={i} className="sc-progress-dot" />
+        ))}
       </div>
 
       {/* textes des verres : dessinés dans un canvas, doublés ici pour les lecteurs d'écran */}

@@ -34,10 +34,18 @@ body {
 }
 
 
-.char { display: inline-block; }
+.char {
+  display: inline-block;
+}
+
 /* ===== Variantes de révélation (clip-path animé par GSAP) ===== */
-.glass-tr { clip-path: inset(0% 0% 100% 100%); }
-.glass-bl { clip-path: inset(100% 100% 0% 0%); }
+.glass-tr {
+  clip-path: inset(0% 0% 100% 100%);
+}
+
+.glass-bl {
+  clip-path: inset(100% 100% 0% 0%);
+}
 
 /* ===== Trait de lumière ===== */
 .trait {
@@ -46,14 +54,12 @@ body {
   right: 6%;
   top: 50%;
   height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    #f4f1ea 12%,
-    #fff 50%,
-    #f4f1ea 88%,
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      #f4f1ea 12%,
+      #fff 50%,
+      #f4f1ea 88%,
+      transparent);
   box-shadow:
     0 0 8px rgb(244 241 234 / 0.9),
     0 0 24px rgb(244 241 234 / 0.45),
@@ -87,12 +93,10 @@ body {
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.11'/%3E%3C/svg%3E"),
     radial-gradient(120% 80% at 0% 0%, rgb(255 255 255 / 0.22), transparent 55%),
     radial-gradient(100% 70% at 100% 100%, rgb(170 205 255 / 0.14), transparent 60%),
-    linear-gradient(
-      160deg,
+    linear-gradient(160deg,
       rgb(18 16 14 / 0.48),
       rgb(12 11 10 / 0.38) 45%,
-      rgb(0 0 0 / 0.62)
-    );
+      rgb(0 0 0 / 0.62));
 
   backdrop-filter: blur(18px) saturate(1.45) contrast(1.06) brightness(0.92);
   -webkit-backdrop-filter: blur(18px) saturate(1.45) contrast(1.06) brightness(0.92);
@@ -121,13 +125,11 @@ body {
   inset: 0;
   padding: 1px;
   border-radius: inherit;
-  background: linear-gradient(
-    135deg,
-    rgb(255 255 255 / 0.9),
-    rgb(255 255 255 / 0.14) 28%,
-    rgb(255 255 255 / 0.04) 60%,
-    rgb(255 255 255 / 0.55)
-  );
+  background: linear-gradient(135deg,
+      rgb(255 255 255 / 0.9),
+      rgb(255 255 255 / 0.14) 28%,
+      rgb(255 255 255 / 0.04) 60%,
+      rgb(255 255 255 / 0.55));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
@@ -141,13 +143,11 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(
-    115deg,
-    transparent 32%,
-    rgb(255 255 255 / 0.2) 43%,
-    rgb(255 255 255 / 0.05) 50%,
-    transparent 58%
-  );
+  background: linear-gradient(115deg,
+      transparent 32%,
+      rgb(255 255 255 / 0.2) 43%,
+      rgb(255 255 255 / 0.05) 50%,
+      transparent 58%);
   background-size: 260% 100%;
   background-position: 150% 0;
   animation: glass-sheen 9s ease-in-out infinite;
@@ -156,12 +156,23 @@ body {
 }
 
 @keyframes glass-sheen {
-  0%, 15% { background-position: 150% 0; }
-  60%, 100% { background-position: -50% 0; }
+
+  0%,
+  15% {
+    background-position: 150% 0;
+  }
+
+  60%,
+  100% {
+    background-position: -50% 0;
+  }
 }
 
 /* Contenu au-dessus des reflets */
-.glass-panel > * { position: relative; z-index: 3; }
+.glass-panel>* {
+  position: relative;
+  z-index: 3;
+}
 
 /* Variante sombre (fumée) */
 .glass-panel--dark {
@@ -180,7 +191,9 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .glass-panel::after { animation: none; }
+  .glass-panel::after {
+    animation: none;
+  }
 }
 
 @media (max-height: 520px) {
@@ -197,20 +210,28 @@ body {
 .showcase {
   --sc-w: 26.9vw;
   --sc-h: calc(var(--sc-w) / 1.6);
-  --sc-shift: 0px; /* décalage du cadre et de la légende vers la carte active */
+  --sc-shift: 0px;
+  /* décalage du cadre et de la légende vers la carte active */
 }
+
 @media (max-width: 767px) {
-  .showcase { --sc-w: 62vw; }
+  .showcase {
+    --sc-w: 62vw;
+  }
 }
 
 /* 6 cartes (data-count="6") : valeurs identiques à LAYOUT dans src/lib/showcaseLayout.ts.
    La carte active n'est plus au centre : elle est à un demi-pas à gauche. */
 .showcase[data-count="6"] {
   --sc-w: 18vw;
-  --sc-shift: calc(var(--sc-w) * 0.5425); /* = GAP / 2 */
+  --sc-shift: calc(var(--sc-w) * 0.5425);
+  /* = GAP / 2 */
 }
+
 @media (max-width: 767px) {
-  .showcase[data-count="6"] { --sc-w: 46vw; }
+  .showcase[data-count="6"] {
+    --sc-w: 46vw;
+  }
 }
 
 /* Scène plus grande que l'écran (+8 % de chaque côté) : la lentille a besoin
@@ -241,28 +262,14 @@ body {
   backface-visibility: hidden;
   will-change: transform, filter, opacity;
 }
+
 .sc-card img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.03); /* masque le liseré noir en haut des cartes */
-}
-
-/* Cadre autour de l'image cadrée : position et taille posées en px par
-   ShowcaseLayer (variables --sc-f*), centré sans margin auto pour que
-   GSAP puisse animer scale/opacity librement. */
-.sc-focus {
-  position: absolute;
-  left: calc(50% + var(--sc-fx, 0px) - var(--sc-fw, 0px) / 2);
-  top: calc(50% + var(--sc-fy, 0px) - var(--sc-fh, 0px) / 2);
-  right: auto;
-  bottom: auto;
-  margin: 0;
-  width: var(--sc-fw, 0px);
-  height: var(--sc-fh, 0px);
-  border: 1px solid rgb(255 255 255 / 0.45);
-  opacity: 0;
+  transform: scale(1.03);
+  /* masque le liseré noir en haut des cartes */
 }
 
 /* Titre / filtres au-dessus du bloc d'images, centrés sur lui */
@@ -299,23 +306,39 @@ body {
   text-align: center;
 }
 
-.sc-cross {
+/* Barre de progression : 5 boutons blancs dans une pilule noire (section Synopsis).
+   Chaque bouton se remplit via --l (0..1), posé par GSAP depuis ShowcaseLayer.
+   Centrée sans transform (GSAP anime y/opacity dessus). */
+.sc-progress {
   position: absolute;
-  width: 14px;
-  height: 14px;
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  width: max-content;
+  bottom: max(72px, calc(env(safe-area-inset-bottom, 0px) + 64px));
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 24px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.3);
+  /* fond noir allégé : 0 = transparent, 1 = noir plein */
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid rgb(255 255 255 / 0.45);
+  box-shadow: 0 6px 30px rgb(0 0 0 / 0.25);
 }
-.sc-cross::before,
-.sc-cross::after {
-  content: "";
-  position: absolute;
-  background: rgb(255 255 255 / 0.9);
+
+.sc-progress-dot {
+  --l: 0;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  background: rgb(255 255 255 / calc(var(--l)));
+  transform: scale(calc(0.85 + 0.25 * var(--l)));
 }
-.sc-cross::before { left: 0; right: 0; top: 50%; height: 1px; }
-.sc-cross::after  { top: 0; bottom: 0; left: 50%; width: 1px; }
-.sc-cross.tl { left: -7px;  top: -7px; }
-.sc-cross.tr { right: -7px; top: -7px; }
-.sc-cross.bl { left: -7px;  bottom: -7px; }
-.sc-cross.br { right: -7px; bottom: -7px; }
 
 /* Vignettage fort, coins sombres comme la référence */
 .sc-vignette {
@@ -323,11 +346,9 @@ body {
   inset: 0;
   z-index: 41;
   pointer-events: none;
-  background: radial-gradient(
-    ellipse 85% 80% at 50% 50%,
-    transparent 45%,
-    rgb(0 0 0 / 0.92) 100%
-  );
+  background: radial-gradient(ellipse 85% 80% at 50% 50%,
+      transparent 45%,
+      rgb(0 0 0 / 0.92) 100%);
 }
 
 .sc-grain {
@@ -338,5 +359,3 @@ body {
   opacity: 0.6;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.09'/%3E%3C/svg%3E");
 }
-
-
