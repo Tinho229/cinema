@@ -28,8 +28,10 @@ export const PROJECTS: readonly Project[] = [
     note: {
       eyebrow: "SYNOPSIS",
       title: "Ligne de fuite",
-      body: "Là où les lignes se rejoignent, l’image commence. Un studio, une caméra, un seul point de mire\u00a0: le fond du plan.",
-      foot: "Scène 01 — Prise 01",
+      body: `Sènan, riche héritière, choisit d’épouser Ola, un mécanicien dont elle est profondément amoureuse.
+Convaincue que l’amour peut dépasser les différences sociales, elle construit avec lui une famille
+et donne naissance à deux enfants : Fèmi et Kossi.`,
+      foot: "Synopsis  — Prise 01",
     },
   },
   {
@@ -39,8 +41,10 @@ export const PROJECTS: readonly Project[] = [
     note: {
       eyebrow: "NOTE D’INTENTION",
       title: "Faire image",
-      body: "Chaque projet naît d’un regard, puis d’une lumière. Nous travaillons le cadre jusqu’à ce qu’il respire.",
-      foot: "Scène 02 — Prise 01",
+      body: `Peu à peu, Ola révèle un visage violent et dominateur. Les disputes deviennent des scènes de peur,
+les humiliations se multiplient et les enfants assistent, impuissants, aux souffrances de leur mère.
+Ola finit par s’approprier les biens de Sènan, puis la chasse du domicile familial avec les enfants. La rue devient leur refuge.`,
+      foot: "Synopsis  — Prise 02",
     },
   },
   {
@@ -50,8 +54,9 @@ export const PROJECTS: readonly Project[] = [
     note: {
       eyebrow: "REPÉRAGES",
       title: "Écrire à l’écran",
-      body: "Une interface se lit comme un plan\u00a0: on y entre par un détail, on y reste pour le rythme.",
-      foot: "Scène 03 — Prise 01",
+      body: `Sènan doit affronter la faim, l’exclusion et l’incertitude du lendemain, tout en protégeant ses enfants. Fèmi, alors âgée de onze ans, observe les sacrifices de sa mère.
+               `,
+      foot: "Synopsie — Prise 03",
     },
   },
 
@@ -62,8 +67,25 @@ export const PROJECTS: readonly Project[] = [
     note: {
       eyebrow: "MONTAGE",
       title: "Couper juste",
-      body: "Le rythme se décide au montage\u00a0: on garde ce qui respire, on retire ce qui explique.",
-      foot: "Scène 04 — Prise 01",
+      body: `Elle décide de retrouver son père et de lui demander des comptes. Son objectif est de récupérer les biens dont sa mère a été privée et de rétablir une justice longtemps refusée.`,
+      foot: "Scène 04 — Prise 04",
     },
+
+    
   },
+
+  {
+    title: "Atelier O",
+    sub: "Direction artistique",
+    src: "/images/projects/p5.jpg",
+    note: {
+      eyebrow: "MONTAGE",
+      title: "Couper juste",
+      body: `Cette confrontation fait remonter les blessures du
+passé et pose une question essentielle : la réparation matérielle peut-elle effacer les
+conséquences de la violence ? FÈMI raconte le courage d’une mère qui refuse de se laisser détruire et la détermination d’une fille
+qui transforme les blessures de son enfance en une force de reconquête`,
+     foot: "Synopsis  — Prise 05",
+    },
+  }
 ];

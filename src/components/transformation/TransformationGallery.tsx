@@ -34,9 +34,9 @@ export function TransformationGallery() {
           </h2>
 
           <p className="tg-lead">
-            These aren&rsquo;t before and afters.
+            Le 22 Décembre, découvre avec 
             <br />
-            They&rsquo;re <strong>beginnings and middles</strong>.
+             Nous le <strong>retour glorieux de Fèmi </strong>.
           </p>
         </div>
 

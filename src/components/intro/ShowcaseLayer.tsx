@@ -290,7 +290,7 @@ export function ShowcaseLayer() {
       <div className="sc-caption z-30 px-3 opacity-0">
         <p
           ref={capTitle}
-          className="tx-display text-lg leading-tight text-[#f4f1ea] [text-shadow:0_2px_12px_rgba(0,0,0,0.9)] md:text-2xl"
+          className="tx-display text-lg leading-tight  mt-1  font-medium text-[#f4f1ea]/85 [text-shadow:0_1px_8px_rgba(0,0,0,0.9)] md:text-sm"
         >
           {first.title}
         </p>

@@ -23,7 +23,7 @@ export function TestimonialCard({ item, index }: { item: Testimonial; index: num
         <dl className="tg-meta">
           <div>
             <dt>
-              <RevealText text="Program:" />
+              <RevealText text="Focus:" />
             </dt>
             <dd>
               <RevealText text={item.program} />
@@ -31,7 +31,7 @@ export function TestimonialCard({ item, index }: { item: Testimonial; index: num
           </div>
           <div>
             <dt>
-              <RevealText text="Result:" />
+              <RevealText text="Impact:" />
             </dt>
             <dd>
               <RevealText text={item.result} />
@@ -39,7 +39,7 @@ export function TestimonialCard({ item, index }: { item: Testimonial; index: num
           </div>
           <div>
             <dt>
-              <RevealText text="Duration:" />
+              <RevealText text="Initiative:" />
             </dt>
             <dd>
               <RevealText text={item.duration} />

@@ -233,7 +233,7 @@ export function IntroHero() {
               className="text-xs font-medium text-[#f4f1ea]/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] md:text-[13px]"
             />
             <Line
-              text="XXX XXX"
+              text="AZAH PRODUCTION"
               className="tx-display mt-1 text-[15px] leading-snug text-[#f4f1ea] drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)] md:text-base"
             />
           </div>
@@ -243,7 +243,7 @@ export function IntroHero() {
               className="text-xs font-medium text-[#f4f1ea]/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] md:text-[13px]"
             />
             <Line
-              text="XXX XXX / XXX XXX"
+              text="AGOÏ Ingrid/ AGOÏ Godthanks"
               className="tx-display mt-1 text-[15px] leading-snug text-[#f4f1ea] drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)] md:text-base"
             />
           </div>
@@ -253,7 +253,7 @@ export function IntroHero() {
               className="text-xs font-medium text-[#f4f1ea]/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] md:text-[13px]"
             />
             <Line
-              text="XXX XXX"
+              text="Mahougnon Jean de Dieu"
               className="tx-display mt-1 text-[15px] leading-snug text-[#f4f1ea] drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)] md:text-base"
             />
           </div>
@@ -266,7 +266,7 @@ export function IntroHero() {
           className="text-xs font-medium text-[#f4f1ea]/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] md:text-[13px]"
         />
         <ul className="mt-2.5 space-y-1.5 md:mt-3 md:space-y-2">
-          {["XXX XXX", "XXX XXX", "XXX XXX"].map((name, i) => (
+          {["AGOSSADOU Houefa", "HESSOU Rufin - LAFIA Jacob", "TOFFOHOUSSOU GLORIA" , "AGOÏ Godthanks", "HESSOU Destinol" , "FIDEGNON Séverine" , ].map((name, i) => (
             <li key={i}>
               <Line
                 text={name}
