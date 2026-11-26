@@ -47,9 +47,15 @@ export const footerData = {
     { label: "Mavilla", href: "https://hotelmavillacotonou.com" }
   ],
 
-  copyright: "© 2026 ATELIER",
-  legal: [
-    { label: "PRIVACY", href: "/privacy" },
-    { label: "LEGAL", href: "/legal" },
+  // ---- Barre du bas : 4 petites portions ----
+  // 1) LEBIATECH  2) LinkedIn  3) Facebook  4) TikTok
+  site: { label: "LEBIATECH", href: "https://lebiatech.com" }, // TODO : URL exacte du site
+  copyright: "© 2026 LEBIATECH",
+
+  // TODO : remplace les "#" par les vrais liens des pages LEBIATECH
+  networks: [
+    { id: "linkedin" as const, label: "LinkedIn", href: "#" },
+    { id: "facebook" as const, label: "Facebook", href: "#" },
+    { id: "tiktok" as const, label: "TikTok", href: "#" },
   ],
 };

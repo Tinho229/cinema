@@ -28,7 +28,7 @@
 .cf-visual,
 .cf-card,
 .cf-gallery,
-.cf-legal {
+.cf-legal__cell {
   position: relative;
   min-width: 0;
   overflow: hidden;
@@ -43,14 +43,11 @@
 .cf-visual {
   position: relative;
   isolation: isolate;
-  align-self: center;
+  align-self: stretch;
   width: 100%;
   min-width: 0;
   height: 100%;
   min-height: 0;
-  max-height: calc(100dvh - 32px);
-  aspect-ratio: 726 / 1080;
-  aspect-ratio: 726 / 1080;
   overflow: hidden;
   border-radius: 18px;
   background: transparent;
@@ -62,7 +59,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
   z-index: 0;
 }
@@ -348,25 +345,64 @@
 }
 
 /* ================================
-   LEGAL
+   LEGAL : 4 petites portions
 ================================ */
 
 .cf-legal {
   grid-column: 1 / -1;
   grid-row: 3;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 32px;
-  padding: 0 24px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  min-width: 0;
   font-size: 11px;
   letter-spacing: 0.7px;
-  color: rgba(244, 241, 234, 0.85);
+  color: rgba(244, 241, 234, 0.9);
 }
 
-.cf-legal__links {
+.cf-legal__cell {
   display: flex;
-  gap: 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  text-align: center;
+}
+
+.cf-legal__cell svg {
+  display: block;
+}
+
+.cf-legal__link {
+  transition: background 0.2s ease;
+}
+
+.cf-legal__link:hover,
+.cf-legal__site:hover {
+  background: rgba(255, 255, 255, 0.08);
+  text-decoration: none;
+}
+
+.cf-legal__networks,
+.cf-legal__site {
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cf-legal__label,
+.cf-legal__copy {
+  font-size: 9px;
+  letter-spacing: 0.9px;
+  color: rgba(244, 241, 234, 0.7);
+}
+
+.cf-legal__icons {
+  display: flex;
+  gap: 9px;
+}
+
+.cf-legal__name {
+  font-size: 11px;
+  color: #f4f1ea;
 }
 
 @media (max-height: 760px) and (min-width: 1101px) {
@@ -379,7 +415,8 @@
 
   .cf-visual {
     min-height: 0;
-    max-height: calc(100dvh - 24px);
+    height: 100%;
+    max-height: none;
   }
 
   .cf-right {
@@ -535,16 +572,13 @@
   }
 
   .cf-legal {
-    grid-column: 1 / -1;
-    grid-row: 3;
-    padding: 0 14px;
-    gap: 12px;
-    justify-content: space-between;
-    font-size: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
 
-  .cf-legal__links {
-    gap: 12px;
+  .cf-legal__cell {
+    min-height: 56px;
+    border-radius: 14px;
   }
 }
 
@@ -582,10 +616,5 @@
     align-items: flex-end;
     justify-content: flex-end;
     text-align: right;
-  }
-
-  .cf-legal {
-    min-height: 48px;
-    padding: 10px 14px;
   }
 }
