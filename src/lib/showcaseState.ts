@@ -4,6 +4,8 @@ export const showcaseState = {
   bg: 0,       // 0 → 1 : avancement de l'assombrissement du hero (lu par les verres)
   lens: 0,     // intensité de la lentille (0 → 1)
   step: 0,     // défilement des paires : 0, 1, 2 (fractionnaire pendant la transition)
+  active: false, // true uniquement quand la scène 3D est visible à l'écran
+  invalidate: null as (() => void) | null,
 };
 
 /* Image du hero derrière la section images.

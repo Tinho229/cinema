@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import { EffectComposer } from "@react-three/postprocessing";
@@ -182,6 +182,28 @@ function Card({ i }: { i: number }) {
   );
 }
 
+function SceneDriver() {
+  const { invalidate } = useThree();
+
+  useEffect(() => {
+    showcaseState.invalidate = invalidate;
+    let raf = 0;
+    const tick = () => {
+      if (showcaseState.active) invalidate();
+      raf = window.requestAnimationFrame(tick);
+    };
+    raf = window.requestAnimationFrame(tick);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      if (showcaseState.invalidate === invalidate) {
+        showcaseState.invalidate = null;
+      }
+    };
+  }, [invalidate]);
+
+  return null;
+}
+
 export function Showcase3D() {
   const lens = useMemo(
     () => new LensEffect({ kx: 0.025, ky: LAYOUT.ky, ca: 0.012, grain: 0.045, start: LAYOUT.start }),
@@ -189,14 +211,16 @@ export function Showcase3D() {
   );
   return (
     <Canvas
+      frameloop="demand"
       orthographic
       // jusqu'à 2 : à 1.5, un écran retina (dpr 2-3) étire le canvas, donc toute
       // l'image, et la rend molle. C'était la principale cause du flou des images.
       dpr={[1, 2]}
       camera={{ position: [0, 0, 10], zoom: 1 }}
-      gl={{ alpha: true, antialias: false }}
+      gl={{ alpha: true, antialias: false, powerPreference: "high-performance" }}
       style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
     >
+      <SceneDriver />
       {/* Bloc de gauche : les images. Bloc de droite : les verres. */}
       {PROJECTS.map((_, i) => (
         <Card key={`img-${i}`} i={i} />

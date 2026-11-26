@@ -128,11 +128,11 @@ export function ShowcaseLayer() {
     window.addEventListener("resize", place);
 
     let ctx: gsap.Context | undefined;
-    let timer = 0;
     let units = 12; // remplacé par la durée réelle de la timeline
 
     const build = () => {
       showcaseState.step = 0;
+      showcaseState.active = false;
       wipe.p = 0;
       repaintWipe();
 
@@ -143,10 +143,18 @@ export function ShowcaseLayer() {
             trigger: hero,
             start: "top top",
             end: () => `+=${Math.round(units * SCROLL_PER_UNIT)}%`,
-            scrub: 1,
+            scrub: true,
             pin: hero,
             anticipatePin: 1,
             invalidateOnRefresh: true,
+            onUpdate: () => {
+              const t = tl.time();
+              const start = tl.labels.showcase ?? 0;
+              const end = tl.labels.footerEnd ?? tl.duration();
+              const active = t >= start - 0.05 && t <= end + 0.05;
+              showcaseState.active = active;
+              if (active) showcaseState.invalidate?.();
+            },
           },
         });
 
@@ -162,7 +170,7 @@ export function ShowcaseLayer() {
         const at = (d: number) => `showcase+=${d}`;
 
         // Le titre de l'intro s'efface dès que la section commence à monter.
-        tl.to(".title-end, .scroll-hint", { opacity: 0, y: -24, filter: "blur(8px)", duration: 1.4 }, 0);
+        tl.to(".title-end, .scroll-hint", { opacity: 0, y: -24, duration: 1.4 }, 0);
 
         // L'image du hero RESTE : plus de fondu vers le noir, juste une légère avancée.
         tl.fromTo(".hero-media", { scale: 1 }, { scale: 1.06, duration: 3, ease: "power2.inOut" }, at(0));
@@ -253,14 +261,14 @@ export function ShowcaseLayer() {
     };
 
     const onDone = () => {
-      timer = window.setTimeout(build, 80);
+      build();
     };
     window.addEventListener("intro:done", onDone);
 
     return () => {
-      window.clearTimeout(timer);
       window.removeEventListener("intro:done", onDone);
       window.removeEventListener("resize", place);
+      showcaseState.active = false;
       ctx?.revert();
       if (footer) clearMask(footer);
       if (slide) slide.style.removeProperty("top");

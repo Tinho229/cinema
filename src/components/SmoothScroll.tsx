@@ -11,7 +11,7 @@ import { gsap, ScrollTrigger } from "@/lib/gsap";
  */
 export default function SmoothScroll() {
   useEffect(() => {
-    const lenis = new Lenis({ lerp: 0.1 });
+    const lenis = new Lenis({ lerp: 0.14 });
     lenis.stop();
     lenis.on("scroll", ScrollTrigger.update);
 
