@@ -296,14 +296,24 @@ body {
   text-align: center;
 }
 
-/* Légende : sous le bloc d'images, centrée sur lui */
-.sc-caption {
-  position: absolute;
-  left: calc(50% + var(--sc-bx, 0px) - var(--sc-bw, 0px) / 2);
-  right: auto;
-  width: var(--sc-bw, 0px);
-  top: var(--sc-ctop, 50%);
-  text-align: center;
+/* Titres de section H2 au-dessus des carrousels (En images / Synopsis) */
+.sc-heading {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(26px, 3.6vw, 56px);
+  font-weight: 700;
+  -webkit-text-stroke: 0.03em currentColor;
+  paint-order: stroke fill;
+  line-height: 1.08;
+  letter-spacing: 0.015em;
+  color: #f4f1ea;
+  text-shadow: 0 3px 18px rgb(0 0 0 / 0.94);
+}
+
+@media (max-height: 520px) {
+  .sc-heading {
+    font-size: clamp(20px, 3vw, 32px);
+  }
 }
 
 /* Barre de progression : 5 boutons blancs dans une pilule noire (section Synopsis).

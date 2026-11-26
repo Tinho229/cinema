@@ -27,11 +27,11 @@ export const footerData = {
 
   mainImage: "/images/footer/main.jpg",
 
-  contactTitle: "CONTACT",
+  contactTitle: "CONTACT / ADDRESSE",
   addressLabel: "ADDRESS",
   address: ["Hôtel Mavilla, Cotonou, Bénin"],
 
-  phoneLabel: "PHONE",
+  phoneLabel: "TELEPHONE",
   phone: "+229 01 97 19 83 00",
 
   emailLabel: "EMAIL",

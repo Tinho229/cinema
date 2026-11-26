@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { showcaseState } from "@/lib/showcaseState";
-import { MAX_STEP, activeProject, blockRect, isStackedViewport } from "@/lib/showcaseLayout";
+import { MAX_STEP, blockRect, isStackedViewport } from "@/lib/showcaseLayout";
 import { PROJECTS } from "@/lib/showcaseContent";
 import { addGalleryTimeline } from "@/components/transformation/galleryTimeline";
 
@@ -81,8 +81,6 @@ function paintWipe(el: HTMLElement, t: number, width: number) {
 
 export function ShowcaseLayer() {
   const layer = useRef<HTMLDivElement>(null);
-  const capTitle = useRef<HTMLParagraphElement>(null);
-  const capSub = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
     const el = layer.current;
@@ -112,11 +110,10 @@ export function ShowcaseLayer() {
       const set = (k: string, v: number) => el.style.setProperty(k, `${v}px`);
       set("--sc-bx", bl.x);
       set("--sc-bw", bl.w);
-      set("--sc-ctop", H / 2 - bl.y + bl.h / 2 + (stacked ? 8 : 18)); // légende sous le bloc d'images
-      set("--sc-fbot", H / 2 + bl.y + bl.h / 2 + (stacked ? 8 : 16)); // titre au-dessus des images
+      set("--sc-fbot", H / 2 + bl.y + bl.h / 2 + (stacked ? 14 : 30)); // titre au-dessus des images
       set("--sc-gx", gl.x);
       set("--sc-gw", gl.w);
-      set("--sc-gbot", H / 2 + gl.y + gl.h / 2 + (stacked ? 10 : 16)); // titre au-dessus des verres (Synopsis)
+      set("--sc-gbot", H / 2 + gl.y + gl.h / 2 + (stacked ? 14 : 30)); // titre au-dessus des verres (Synopsis)
 
       // footer plus court que l'écran : centré ; plus long : calé en haut (il défile ensuite)
       if (footer && slide) {
@@ -138,22 +135,10 @@ export function ShowcaseLayer() {
       showcaseState.step = 0;
       wipe.p = 0;
       repaintWipe();
-      let shown = activeProject(0);
-
-      // la légende suit le projet de l'image cadrée
-      const sync = () => {
-        const p = activeProject(showcaseState.step);
-        if (p !== shown) {
-          shown = p;
-          if (capTitle.current) capTitle.current.textContent = PROJECTS[p].title;
-          if (capSub.current) capSub.current.textContent = PROJECTS[p].sub;
-        }
-      };
 
       ctx = gsap.context(() => {
         const tl = gsap.timeline({
           defaults: { ease: "power2.inOut" },
-          onUpdate: sync,
           scrollTrigger: {
             trigger: hero,
             start: "top top",
@@ -193,7 +178,6 @@ export function ShowcaseLayer() {
         tl.fromTo(showcaseState, { zoom: 3.2 }, { zoom: 1, duration: 3.2, ease: "power3.out" }, at(0.5));
         tl.fromTo(showcaseState, { spread: 0 }, { spread: 1, duration: 3, ease: "power3.out" }, at(1.6));
 
-        tl.fromTo(".sc-caption", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }, at(4.2));
         tl.fromTo(".sc-filters", { opacity: 0 }, { opacity: 1, duration: 0.8 }, at(4.4));
         tl.fromTo(".sc-header", { opacity: 0 }, { opacity: 1, duration: 0.8 }, at(4.4));
         tl.fromTo(".sc-progress", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, at(4.4));
@@ -265,7 +249,6 @@ export function ShowcaseLayer() {
         units = tl.duration();
       }, hero);
 
-      sync();
       ScrollTrigger.refresh();
     };
 
@@ -284,9 +267,6 @@ export function ShowcaseLayer() {
     };
   }, []);
 
-  // légende initiale ; mise à jour ensuite par sync()
-  const first = PROJECTS[activeProject(0)];
-
   return (
     <div
       ref={layer}
@@ -299,30 +279,15 @@ export function ShowcaseLayer() {
       </div>
 
       <div className="sc-filters z-30 px-3 opacity-0">
-        <p className="text-[11px] font-medium tracking-[0.22em] text-[#f4f1ea]/80 uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.9)] md:text-xs">
+        <h2 className="sc-heading">
           En images
-        </p>
+        </h2>
       </div>
 
       <div className="sc-header z-30 px-3 opacity-0">
-        <p className="tx-display text-lg leading-tight tracking-wide text-[#f4f1ea] [text-shadow:0_2px_12px_rgba(0,0,0,0.9)] md:text-2xl">
+        <h2 className="sc-heading">
           Synopsis
-        </p>
-      </div>
-
-      <div className="sc-caption z-30 px-3 opacity-0">
-        <p
-          ref={capTitle}
-          className="tx-display text-base leading-tight text-[#f4f1ea] [text-shadow:0_2px_12px_rgba(0,0,0,0.9)] md:text-lg"
-        >
-          {first.title}
-        </p>
-        <p
-          ref={capSub}
-          className="mt-1 text-xs font-medium text-[#f4f1ea]/85 [text-shadow:0_1px_8px_rgba(0,0,0,0.9)] md:text-sm"
-        >
-          {first.sub}
-        </p>
+        </h2>
       </div>
 
       {/* barre de 5 boutons blancs sur fond noir, liée au scroll de la section */}
