@@ -109,6 +109,7 @@ export function ShowcaseLayer() {
       const stacked = isStackedViewport(W, H);
       const fr = slotRect("image", FOCUS, W, 1, H);
       const bl = blockRect("image", W, H);
+      const gl = blockRect("glass", W, H);
       const set = (k: string, v: number) => el.style.setProperty(k, `${v}px`);
       set("--sc-fx", fr.x);
       set("--sc-fy", -fr.y);
@@ -116,8 +117,11 @@ export function ShowcaseLayer() {
       set("--sc-fh", fr.h * 1.035);
       set("--sc-bx", bl.x);
       set("--sc-bw", bl.w);
-      set("--sc-ctop", H / 2 - bl.y + bl.h / 2 + (stacked ? 12 : 20)); // légende sous le bloc d'images
-      set("--sc-fbot", H / 2 + bl.y + bl.h / 2 + (stacked ? 12 : 20)); // filtres au-dessus
+      set("--sc-ctop", H / 2 - bl.y + bl.h / 2 + (stacked ? 8 : 18)); // légende sous le bloc d'images
+      set("--sc-fbot", H / 2 + bl.y + bl.h / 2 + (stacked ? 8 : 16)); // titre au-dessus des images
+      set("--sc-gx", gl.x);
+      set("--sc-gw", gl.w);
+      set("--sc-gbot", H / 2 + gl.y + gl.h / 2 + (stacked ? 10 : 16)); // titre au-dessus des verres (Synopsis)
 
       // footer plus court que l'écran : centré ; plus long : calé en haut (il défile ensuite)
       if (footer && slide) {
@@ -287,10 +291,22 @@ export function ShowcaseLayer() {
         </div>
       </div>
 
+      <div className="sc-filters z-30 px-3 opacity-0">
+        <p className="text-[11px] font-medium tracking-[0.22em] text-[#f4f1ea]/80 uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.9)] md:text-xs">
+          En images
+        </p>
+      </div>
+
+      <div className="sc-header z-30 px-3 opacity-0">
+        <p className="tx-display text-lg leading-tight tracking-wide text-[#f4f1ea] [text-shadow:0_2px_12px_rgba(0,0,0,0.9)] md:text-2xl">
+          Synopsis
+        </p>
+      </div>
+
       <div className="sc-caption z-30 px-3 opacity-0">
         <p
           ref={capTitle}
-          className="tx-display text-lg leading-tight  mt-1  font-medium text-[#f4f1ea]/85 [text-shadow:0_1px_8px_rgba(0,0,0,0.9)] md:text-sm"
+          className="tx-display text-base leading-tight text-[#f4f1ea] [text-shadow:0_2px_12px_rgba(0,0,0,0.9)] md:text-lg"
         >
           {first.title}
         </p>

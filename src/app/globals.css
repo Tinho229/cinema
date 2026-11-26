@@ -265,7 +265,7 @@ body {
   opacity: 0;
 }
 
-/* Filtres : au-dessus du bloc d'images, centrés sur lui */
+/* Titre / filtres au-dessus du bloc d'images, centrés sur lui */
 .sc-filters {
   position: absolute;
   left: calc(50% + var(--sc-bx, 0px) - var(--sc-bw, 0px) / 2);
@@ -274,6 +274,19 @@ body {
   bottom: var(--sc-fbot, 50%);
   display: flex;
   justify-content: center;
+  text-align: center;
+}
+
+/* Titre au-dessus du bloc des verres (Synopsis), centré sur lui */
+.sc-header {
+  position: absolute;
+  left: calc(50% + var(--sc-gx, 0px) - var(--sc-gw, 0px) / 2);
+  right: auto;
+  width: var(--sc-gw, 0px);
+  bottom: var(--sc-gbot, 50%);
+  display: flex;
+  justify-content: center;
+  text-align: center;
 }
 
 /* Légende : sous le bloc d'images, centrée sur lui */
