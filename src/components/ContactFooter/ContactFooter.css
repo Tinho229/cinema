@@ -175,7 +175,8 @@
   position: relative;
   overflow: hidden;
   border-radius: 18px;
-  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
 }
 
 .cf-gallery__item img {
@@ -448,11 +449,16 @@
   }
 
   .cf-opening,
+  .cf-gallery,
   .cf-map,
   .cf-contact,
   .cf-legal {
     grid-column: 1;
     grid-row: auto;
+  }
+
+  .cf-gallery {
+    min-height: 240px;
   }
 
   .cf-map {

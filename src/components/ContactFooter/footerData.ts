@@ -19,10 +19,10 @@ export const footerData = {
   ],
 
   gallery: [
-    "/images/footer/gallery-1.jpg",
-    "/images/footer/gallery-2.jpg",
-    "/images/footer/gallery-3.jpg",
-    "/images/footer/gallery-4.jpg",
+    { src: "/images/projects/p1.jpg", alt: "Fèmi — portrait", position: "center 20%" },
+    { src: "/images/projects/p2.jpg", alt: "Scène du film — bureau", position: "32% center" },
+    { src: "/images/projects/p3.jpg", alt: "Fèmi — attente", position: "center 20%" },
+    { src: "/images/projects/p4.jpg", alt: "Scène du film — famille", position: "center 20%" },
   ],
 
   mainImage: "/images/footer/main.jpg",

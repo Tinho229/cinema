@@ -38,8 +38,20 @@ export default function ContactFooter() {
         </section>
 
 
-                {/* Gallery */}
-                {/* Gallery */}
+        {/* Gallery */}
+        <section className="cf-gallery" aria-label="Galerie du film">
+          {footerData.gallery.map((photo) => (
+            <div className="cf-gallery__item" key={photo.src}>
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                sizes="(max-width: 700px) 45vw, (max-width: 1100px) 25vw, 18vw"
+                style={{ objectPosition: photo.position }}
+              />
+            </div>
+          ))}
+        </section>
         
 
         {/* Map */}
