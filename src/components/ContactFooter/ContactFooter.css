@@ -490,124 +490,60 @@
 
 @media (max-width: 700px) {
   .contact-footer {
-    padding: 10px;
-    gap: 10px;
+    padding: 12px;
+    gap: 12px;
   }
 
-  .cf-visual {
-    width: min(100%, 260px);
-    height: auto;
-    min-height: 0;
-    border-radius: 14px;
-  }
-
-  .cf-visual__title {
-    left: 24px;
-    bottom: 35px;
-    font-size: clamp(56px, 15vw, 96px);
-  }
-
-  .cf-right {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: minmax(230px, auto) minmax(230px, auto) 54px;
-    gap: 10px;
-  }
-
-  .cf-opening {
-    padding: 14px 12px;
-  }
-
-  .cf-opening__list {
-    gap: 6px;
-    margin-top: 10px;
-  }
-
-  .cf-opening__row {
-    font-size: 12px;
-    gap: 6px;
-  }
-
-  .cf-card__title {
-    font-size: 20px;
-  }
-
-  .cf-gallery {
-    gap: 8px;
-  }
-
-  .cf-gallery__item {
-    border-radius: 10px;
-  }
-
-  .cf-map,
-  .cf-contact {
-    grid-row: 2;
-  }
-
+  .cf-visual,
+  .cf-gallery,
   .cf-map {
-    min-height: 220px;
+    display: none;
   }
 
-  .cf-contact {
-    padding: 18px 12px;
-  }
-
-  .cf-contact__list {
-    gap: 16px;
-    margin-top: 18px;
-  }
-
-  .cf-contact__row {
-    grid-template-columns: 1fr;
-    gap: 5px;
-    font-size: 12px;
-  }
-
-  .cf-contact__value,
-  .cf-contact__row>a,
-  .cf-contact__socials {
-    align-items: flex-start;
-    justify-content: flex-start;
-    text-align: left;
-  }
-
-  .cf-legal {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-  .cf-legal__cell {
-    min-height: 56px;
-    border-radius: 14px;
-  }
-}
-
-@media (max-width: 500px) {
   .cf-right {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto;
+    gap: 12px;
   }
 
   .cf-opening,
-  .cf-gallery,
-  .cf-map,
   .cf-contact,
   .cf-legal {
     grid-column: 1;
     grid-row: auto;
   }
 
-  .cf-gallery {
-    min-height: 240px;
+  .cf-opening {
+    padding: 18px 16px;
   }
 
-  .cf-map {
-    min-height: 190px;
+  .cf-opening__list {
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .cf-opening__row {
+    font-size: 12.5px;
+    gap: 8px;
+  }
+
+  .cf-card__title {
+    font-size: 20px;
+  }
+
+  .cf-contact {
+    padding: 18px 16px;
+  }
+
+  .cf-contact__list {
+    gap: 14px;
+    margin-top: 14px;
   }
 
   .cf-contact__row {
     grid-template-columns: 74px minmax(0, 1fr);
     gap: 10px;
+    font-size: 12.5px;
   }
 
   .cf-contact__value,
@@ -616,5 +552,15 @@
     align-items: flex-end;
     justify-content: flex-end;
     text-align: right;
+  }
+
+  .cf-legal {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .cf-legal__cell {
+    min-height: 52px;
+    border-radius: 14px;
   }
 }
