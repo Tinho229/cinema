@@ -8,15 +8,20 @@ export const footerData = {
     { label: "BOOK A TABLE", href: "#booking" },
   ],
 
-  openingTitle: "REJOIGNEZ-NOUS LE",
+  openingTitle: "AVANT-PREMIÈRE EXCLUSIVE",
   openingHours: [
-    { day: "Mon", hours: "16:00 - 22:30" },
-    { day: "Tue", hours: "16:00 - 22:30" },
-    { day: "Wed", hours: "16:00 - 22:30" },
-    { day: "Thu", hours: "16:00 - 22:30" },
-    { day: "Fri", hours: "16:00 - 22:30" },
-    { day: "Sat & Sun", hours: "16:00 - 22:30" },
+    { day: "📅 Date", hours: "22 Décembre 2026" },
+    { day: "🕖 Heure", hours: "19H" },
+    { day: "📍 Lieu", hours: "Cotonou — Hôtel Mavilla" },
   ],
+  ticketTitle: "🎟️ Tarifs",
+  tickets: [
+    { category: "STANDARD", price: "5 000 F" },
+    { category: "VIP", price: "10 000 F" },
+    { category: "PRESTIGE", price: "15 000 F" },
+  ],
+  reservationPhone: "+229 01 47 24 40 56",
+  tagline: "Ne manquez pas ce grand rendez-vous.",
 
   gallery: [
     { src: "/images/projects/p1.jpg", alt: "Fèmi — portrait", position: "center 20%" },

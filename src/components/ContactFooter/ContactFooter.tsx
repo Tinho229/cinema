@@ -22,19 +22,41 @@ export default function ContactFooter() {
 
       {/* RIGHT: Grid */}
       <div className="cf-right">
-        {/* Opening hours */}
+        {/* Avant-première event info */}
         <section className="cf-card cf-opening">
           <h3 className="cf-card__title">{footerData.openingTitle}</h3>
 
           <div className="cf-opening__list">
             {footerData.openingHours.map((item) => (
               <div className="cf-opening__row" key={item.day}>
-                <span>{item.day}</span>
-                <span className="cf-opening__dots" />
-                <span>{item.hours}</span>
+                <span className="cf-opening__day">{item.day}</span>
+                <span className="cf-opening__hours">{item.hours}</span>
               </div>
             ))}
           </div>
+
+          <div className="cf-opening__tickets">
+            <p className="cf-opening__ticket-title">{footerData.ticketTitle}</p>
+            <table className="cf-opening__table">
+              <tbody>
+                {footerData.tickets.map((t) => (
+                  <tr key={t.category}>
+                    <td className="cf-opening__cat">{t.category}</td>
+                    <td className="cf-opening__price">{t.price}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="cf-opening__reservation">
+            <span className="cf-opening__res-label">📞 Infos &amp; réservation</span>
+            <a href={`tel:${footerData.reservationPhone}`} className="cf-opening__res-phone">
+              {footerData.reservationPhone}
+            </a>
+          </div>
+
+          <p className="cf-opening__tagline">{footerData.tagline}</p>
         </section>
 
 
@@ -57,8 +79,8 @@ export default function ContactFooter() {
         {/* Map */}
         <section className="cf-card cf-map">
           <iframe
-            title="Location map"
-            src="https://www.google.com/maps/"
+            title="Hôtel Mavilla Cotonou — carte"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.0!2d2.4535205!3d6.3756492!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x102355adaccfd86b%3A0x75feee21c758f664!2sH%C3%94TEL%20MAVILLA%20COTONOU%20(Salle%20Prestige)!5e0!3m2!1sfr!2sbj!4v1700000000000!5m2!1sfr!2sbj"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
           />

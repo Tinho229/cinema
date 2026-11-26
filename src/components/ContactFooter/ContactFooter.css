@@ -4,6 +4,7 @@
 
 .contact-footer {
   width: 100%;
+  min-height: 100dvh;
   display: grid;
   grid-template-columns: clamp(220px, min(25vw, calc((100dvh - 32px) * 726 / 1080)), 360px) minmax(0, 1fr);
   align-items: stretch;
@@ -104,9 +105,10 @@
 .cf-right {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  grid-template-rows: minmax(260px, 1fr) minmax(260px, 1fr) 60px;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) 52px;
   gap: 16px;
   min-width: 0;
+  min-height: calc(100dvh - 32px);
 }
 
 /* ================================
@@ -116,7 +118,10 @@
 .cf-opening {
   grid-column: 1;
   grid-row: 1;
-  padding: 24px;
+  padding: clamp(14px, 2vh, 22px) 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .cf-card {
@@ -128,31 +133,119 @@
   text-align: center;
   font-family: var(--font-display), Georgia, serif;
   font-weight: 400;
-  font-size: clamp(22px, 1.9vw, 26px);
+  font-size: clamp(18px, 1.6vw, 24px);
   line-height: 1.1;
   color: #f4f1ea;
 }
 
-/* Opening hours */
+/* Opening — avant-première event */
 .cf-opening__list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 18px;
+  gap: 6px;
+  margin-top: 10px;
 }
 
 .cf-opening__row {
-  display: grid;
-  grid-template-columns: 66px minmax(10px, 1fr) auto;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 12.5px;
   color: #f4f1ea;
 }
 
-.cf-opening__dots {
-  height: 1px;
-  border-bottom: 1px dotted rgba(255, 255, 255, 0.28);
+.cf-opening__day {
+  flex-shrink: 0;
+  color: rgba(244, 241, 234, 0.72);
+  font-size: 11.5px;
+  letter-spacing: 0.4px;
+}
+
+.cf-opening__hours {
+  font-weight: 600;
+  text-align: right;
+}
+
+/* Ticket table */
+.cf-opening__tickets {
+  margin-top: 10px;
+}
+
+.cf-opening__ticket-title {
+  font-size: 10.5px;
+  letter-spacing: 0.9px;
+  color: rgba(244, 241, 234, 0.72);
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+
+.cf-opening__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cf-opening__table tr + tr td {
+  border-top: 1px solid rgba(244, 241, 234, 0.1);
+}
+
+.cf-opening__table td {
+  padding: 4px 2px;
+  font-size: 12.5px;
+  color: #f4f1ea;
+}
+
+.cf-opening__cat {
+  letter-spacing: 0.8px;
+  font-weight: 500;
+}
+
+.cf-opening__price {
+  text-align: right;
+  font-weight: 700;
+  font-size: 13px;
+  color: #e8d5a3;
+}
+
+/* Reservation */
+.cf-opening__reservation {
+  margin-top: 10px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(244, 241, 234, 0.15);
+}
+
+.cf-opening__res-label {
+  font-size: 10.5px;
+  letter-spacing: 0.7px;
+  color: rgba(244, 241, 234, 0.65);
+  text-transform: uppercase;
+}
+
+.cf-opening__res-phone {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #e8d5a3;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+}
+
+.cf-opening__res-phone:hover {
+  text-decoration: underline;
+}
+
+/* Tagline */
+.cf-opening__tagline {
+  margin: 6px 0 0;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: rgba(244, 241, 234, 0.6);
+  font-style: italic;
+  text-align: center;
 }
 
 /* ================================
@@ -190,7 +283,7 @@
 .cf-map {
   grid-column: 1;
   grid-row: 2;
-  min-height: 240px;
+  min-height: 0;
 }
 
 .cf-map iframe {
@@ -280,7 +373,6 @@
   .contact-footer {
     grid-template-columns: clamp(220px, min(25vw, calc((100dvh - 24px) * 726 / 1080)), 360px) minmax(0, 1fr);
     min-height: 100dvh;
-    grid-template-columns: clamp(280px, calc((100dvh - 24px) * 726 / 1080), 440px) minmax(0, 1fr);
     gap: 12px;
     padding: 12px 16px;
   }
@@ -292,23 +384,36 @@
 
   .cf-right {
     min-height: calc(100dvh - 24px);
-    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) 52px;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) 48px;
     gap: 12px;
   }
 
   .cf-opening,
   .cf-contact {
-    padding: 18px 20px;
+    padding: 12px 16px;
   }
 
   .cf-opening__list {
-    gap: 8px;
-    margin-top: 14px;
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .cf-opening__tickets {
+    margin-top: 8px;
+  }
+
+  .cf-opening__table td {
+    padding: 3px 2px;
+  }
+
+  .cf-opening__reservation {
+    margin-top: 8px;
+    padding-top: 6px;
   }
 
   .cf-contact__list {
     gap: 12px;
-    margin-top: 14px;
+    margin-top: 12px;
   }
 
   .cf-map {
@@ -323,6 +428,7 @@
 @media (max-width: 1100px) {
   .contact-footer {
     grid-template-columns: 1fr;
+    min-height: 0;
   }
 
   .cf-visual {
@@ -336,6 +442,7 @@
   }
 
   .cf-right {
+    min-height: 0;
     grid-template-rows: minmax(260px, auto) minmax(260px, auto) 60px;
   }
 }
@@ -370,17 +477,16 @@
   }
 
   .cf-opening {
-    padding: 18px 12px;
+    padding: 14px 12px;
   }
 
   .cf-opening__list {
-    gap: 11px;
-    margin-top: 18px;
+    gap: 6px;
+    margin-top: 10px;
   }
 
   .cf-opening__row {
     font-size: 12px;
-    grid-template-columns: 60px minmax(6px, 1fr) auto;
     gap: 6px;
   }
 
