@@ -413,7 +413,7 @@
 
     .tg-card {
         grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: clamp(130px, 24dvh, 195px) minmax(0, 1fr);
+        grid-template-rows: clamp(165px, 34dvh, 280px) minmax(0, 1fr);
         border-radius: 20px;
     }
 
