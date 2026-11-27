@@ -20,7 +20,8 @@ const FOOTER_BG_OVERRIDE = ".footer-layer .contact-footer { background: transpar
    - .footer-slide : le footer, qui défile dans le cadre si l'écran est court */
 export function FooterLayer() {
   return (
-    <div className="footer-layer invisible pointer-events-none absolute inset-0 z-[70] overflow-hidden [&_iframe]:pointer-events-none">
+    // fond noir de secours si l'image hero met du temps à charger
+    <div className="footer-layer invisible pointer-events-none absolute inset-0 z-[70] overflow-hidden bg-black [&_iframe]:pointer-events-none">
       <style>{FOOTER_BG_OVERRIDE}</style>
 
       <div className="footer-bg absolute inset-0 overflow-hidden" aria-hidden="true">

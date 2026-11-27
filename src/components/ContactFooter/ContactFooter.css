@@ -490,7 +490,11 @@
 
 @media (max-width: 700px) {
   .contact-footer {
+    /* Sur mobile, hauteur = auto (le contenu dicte la taille).
+       min-height 100dvh garantit qu'on remplit au moins l'écran,
+       mais n'empêche pas l'expansion si le contenu est plus grand. */
     min-height: 100dvh;
+    height: auto;
     padding: 12px;
     gap: 12px;
   }
@@ -502,11 +506,14 @@
   }
 
   .cf-right {
-    min-height: calc(100dvh - 24px);
+    /* Pas de min-height fixe : on laisse le contenu determiner la hauteur.
+       align-content: space-evenly distribue l'espace disponible. */
+    min-height: 0;
+    height: auto;
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto auto;
-    align-content: space-evenly;
-    gap: 12px;
+    align-content: start;
+    gap: 16px;
   }
 
   .cf-opening,

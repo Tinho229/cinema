@@ -11,7 +11,18 @@ import { gsap, ScrollTrigger } from "@/lib/gsap";
  */
 export default function SmoothScroll() {
   useEffect(() => {
-    const lenis = new Lenis({ lerp: 0.14 });
+    // Sur mobile touch, on garde un lerp plus élevé pour que le scroll
+    // suive mieux le doigt. On détecte via pointer type.
+    const isTouchDevice =
+      typeof window !== "undefined" &&
+      window.matchMedia("(pointer: coarse)").matches;
+
+    const lenis = new Lenis({
+      lerp: isTouchDevice ? 0.28 : 0.14,
+      // Sur mobile, Lenis doit écouter le document pour intercepter
+      // les events touch avant que le navigateur ne les traite.
+      eventsTarget: typeof window !== "undefined" ? window : undefined,
+    });
     lenis.stop();
     lenis.on("scroll", ScrollTrigger.update);
 
