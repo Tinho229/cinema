@@ -25,7 +25,7 @@ export function FooterLayer() {
 
       <div className="footer-bg absolute inset-0 overflow-hidden" aria-hidden="true">
         <img
-          src="/images/hero.jpg"
+          src="/images/hero.webp"
           alt=""
           decoding="async"
           className="absolute inset-0 h-full w-full object-cover"

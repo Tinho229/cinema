@@ -110,10 +110,10 @@ export function ShowcaseLayer() {
       const set = (k: string, v: number) => el.style.setProperty(k, `${v}px`);
       set("--sc-bx", bl.x);
       set("--sc-bw", bl.w);
-      set("--sc-fbot", H / 2 + bl.y + bl.h / 2 + (stacked ? 48 : 30)); // titre au-dessus des images
+      set("--sc-fbot", H / 2 + bl.y + bl.h / 2 + (stacked ? 14 : 30)); // titre au-dessus des images
       set("--sc-gx", gl.x);
       set("--sc-gw", gl.w);
-      set("--sc-gbot", H / 2 + gl.y + gl.h / 2 + (stacked ? 48 : 30)); // titre au-dessus des verres (Synopsis)
+      set("--sc-gbot", H / 2 + gl.y + gl.h / 2 + (stacked ? 14 : 30)); // titre au-dessus des verres (Synopsis)
 
       // footer plus court que l'écran : centré ; plus long : calé en haut (il défile ensuite)
       if (footer && slide) {

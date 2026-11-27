@@ -23,7 +23,7 @@ export const PROJECTS: readonly Project[] = [
   {
     title: "Rimma",
     sub: "Identité visuelle",
-    src: "/images/projects/p1.jpg",
+    src: "/images/projects/p1.webp",
     note: {
       eyebrow: "SYNOPSIS",
       title: "Ligne de fuite",
@@ -34,7 +34,7 @@ export const PROJECTS: readonly Project[] = [
   {
     title: "Liverpool House",
     sub: "Résidentiel complexe",
-    src: "/images/projects/p2.jpg",
+    src: "/images/projects/p2.webp",
     note: {
       eyebrow: "SYNOPSIS",
       title: "La fracture",
@@ -45,7 +45,7 @@ export const PROJECTS: readonly Project[] = [
   {
     title: "Yantos",
     sub: "Site web",
-    src: "/images/projects/p3.jpg",
+    src: "/images/projects/p3.webp",
     note: {
       eyebrow: "SYNOPSIS",
       title: "La rue pour refuge",
@@ -56,7 +56,7 @@ export const PROJECTS: readonly Project[] = [
   {
     title: "Atelier Nord",
     sub: "Direction artistique",
-    src: "/images/projects/p4.jpg",
+    src: "/images/projects/p4.webp",
     note: {
       eyebrow: "SYNOPSIS",
       title: "Demander des comptes",
@@ -67,7 +67,7 @@ export const PROJECTS: readonly Project[] = [
   {
     title: "Atelier O",
     sub: "Direction artistique",
-    src: "/images/projects/p5.jpg",
+    src: "/images/projects/p5.webp",
     note: {
       eyebrow: "NOTE D’INTENTION",
       title: "Force de reconquête",

@@ -24,10 +24,10 @@ export const footerData = {
   tagline: "Ne manquez pas ce grand rendez-vous.",
 
   gallery: [
-    { src: "/images/projects/p1.jpg", alt: "Fèmi — portrait", position: "center 20%" },
-    { src: "/images/projects/p2.jpg", alt: "Scène du film — bureau", position: "32% center" },
-    { src: "/images/projects/p3.jpg", alt: "Fèmi — attente", position: "center 20%" },
-    { src: "/images/projects/p4.jpg", alt: "Scène du film — famille", position: "center 20%" },
+    { src: "/images/projects/p1.webp", alt: "Fèmi — portrait", position: "center 20%" },
+    { src: "/images/projects/p2.webp", alt: "Scène du film — bureau", position: "32% center" },
+    { src: "/images/projects/p3.webp", alt: "Fèmi — attente", position: "center 20%" },
+    { src: "/images/projects/p4.webp", alt: "Scène du film — famille", position: "center 20%" },
   ],
 
   mainImage: "/images/footer/main.jpg",
@@ -54,8 +54,8 @@ export const footerData = {
 
   // TODO : remplace les "#" par les vrais liens des pages LEBIATECH
   networks: [
-    { id: "linkedin" as const, label: "LinkedIn", href: "#" },
-    { id: "facebook" as const, label: "Facebook", href: "#" },
-    { id: "tiktok" as const, label: "TikTok", href: "#" },
+    { id: "linkedin" as const, label: "LinkedIn", href: "https://www.linkedin.com/company/lebiatech" },
+    { id: "facebook" as const, label: "Facebook", href: "https://www.facebook.com/profile.php?id=61588115761284" },
+    { id: "tiktok" as const, label: "TikTok", href: "https://www.tiktok.com/@lebiatechsolutions" },
   ],
 };

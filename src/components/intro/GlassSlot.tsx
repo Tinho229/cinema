@@ -252,7 +252,7 @@ type Props = {
 export function GlassSlot({ i, project, phase = 0 }: Props) {
   const mesh = useRef<Mesh>(null);
   const mat = useRef<ShaderMaterial>(null);
-  const hero = useTexture("/images/hero.jpg");
+  const hero = useTexture("/images/hero.webp");
   const { size } = useThree();
 
   const backdrop = useMemo(() => getBackdrop(hero), [hero]);

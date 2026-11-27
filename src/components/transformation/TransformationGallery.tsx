@@ -12,7 +12,7 @@ export function TransformationGallery() {
     <div className="tg-layer">
       <div className="tg-bg" aria-hidden="true">
         <img
-          src="/images/hero.jpg"
+          src="/images/hero.webp"
           alt=""
           decoding="async"
           style={{ filter: `blur(${HERO_BLUR}px)`, transform: "scale(1.08)" }}
