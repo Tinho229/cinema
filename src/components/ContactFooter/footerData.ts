@@ -10,11 +10,11 @@ export const footerData = {
 
   openingTitle: "AVANT-PREMIÈRE EXCLUSIVE",
   openingHours: [
-    { day: "📅 Date", hours: "22 Décembre 2026" },
-    { day: "🕖 Heure", hours: "19H" },
-    { day: "📍 Lieu", hours: "Cotonou — Hôtel Mavilla" },
+    { day: "Date", hours: "22 Décembre 2026" },
+    { day: "Heure", hours: "19H" },
+    { day: "Lieu", hours: "Cotonou — Hôtel Mavilla" },
   ],
-  ticketTitle: "🎟️ Tarifs",
+  ticketTitle: "Tarifs",
   tickets: [
     { category: "STANDARD", price: "5 000 F" },
     { category: "VIP", price: "10 000 F" },
@@ -24,10 +24,10 @@ export const footerData = {
   tagline: "Ne manquez pas ce grand rendez-vous.",
 
   gallery: [
-    { src: "/images/projects/p1.webp", alt: "Fèmi — portrait", position: "center 20%" },
-    { src: "/images/projects/p2.webp", alt: "Scène du film — bureau", position: "32% center" },
-    { src: "/images/projects/p3.webp", alt: "Fèmi — attente", position: "center 20%" },
-    { src: "/images/projects/p4.webp", alt: "Scène du film — famille", position: "center 20%" },
+    { src: "/images/suitesMavilla/s1.webp", alt: "Fèmi — portrait", position: "center 20%" },
+    { src: "/images/suitesMavilla/s2.webp", alt: "Scène du film — bureau", position: "32% center" },
+    { src: "/images/suitesMavilla/s3.webp", alt: "Fèmi — attente", position: "center 20%" },
+    { src: "/images/suitesMavilla/s4.webp", alt: "Scène du film — famille", position: "center 20%" },
   ],
 
   mainImage: "/images/footer/main.jpg",
@@ -58,4 +58,6 @@ export const footerData = {
     { id: "facebook" as const, label: "Facebook", href: "https://www.facebook.com/profile.php?id=61588115761284" },
     { id: "tiktok" as const, label: "TikTok", href: "https://www.tiktok.com/@lebiatechsolutions" },
   ],
+
+  
 };

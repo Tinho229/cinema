@@ -71,7 +71,7 @@ export default function ContactFooter() {
           </div>
 
           <div className="cf-opening__reservation">
-            <span className="cf-opening__res-label">📞 Infos &amp; réservation</span>
+            <span className="cf-opening__res-label">Infos &amp; réservation</span>
             <a href={`tel:${footerData.reservationPhone}`} className="cf-opening__res-phone">
               {footerData.reservationPhone}
             </a>
@@ -131,6 +131,8 @@ export default function ContactFooter() {
               <a href={`mailto:${footerData.email}`}>{footerData.email}</a>
             </div>
 
+            
+
             <div className="cf-contact__row">
               <span className="cf-contact__label">{footerData.followLabel}</span>
               <div className="cf-contact__socials">
@@ -146,6 +148,8 @@ export default function ContactFooter() {
                 ))}
               </div>
             </div>
+
+            
           </div>
         </section>
 
