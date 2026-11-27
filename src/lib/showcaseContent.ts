@@ -26,7 +26,7 @@ export const PROJECTS: readonly Project[] = [
     src: "/images/projects/p1.webp",
     note: {
       eyebrow: "SYNOPSIS",
-      title: "Ligne de fuite",
+      title: "Un cœur sans prix",
       body: "Sènan, riche héritière, épouse Ola, un mécanicien dont elle est profondément amoureuse. Convaincue que l’amour dépasse les différences sociales, elle fonde avec lui une famille et met au monde deux enfants\u00a0: Fèmi et Kossi.",
       foot: "Synopsis — Prise 01",
     },
