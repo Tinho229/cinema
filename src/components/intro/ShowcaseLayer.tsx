@@ -27,9 +27,7 @@ const DIM_UNITS = 3.2;
    instants plus tard la colonne 2 part à son tour du bas et monte, puis la 3, etc.
    Toutes les colonnes montent du bas vers le haut et se chevauchent dans le temps. */
 const WIPE_COLS = 8;
-const WIPE_UNITS = 3.5; //  durée totale du balayage (unités de timeline) : plus grand = plus lent
 const COL_DELAY = 0.07; //  écart de départ entre deux colonnes, en part du balayage (0..1)
-const END_HOLD = 0.4; //    petite pause finale, footer entièrement affiché
 
 // Durée d'une colonne (part du balayage) et départ de chacune.
 // La dernière colonne finit exactement à 1 : durée = 1 - (colonnes - 1) * écart.
@@ -130,13 +128,16 @@ export function ShowcaseLayer() {
     ro.observe(el);
 
     let ctx: gsap.Context | undefined;
+    let wipeTween: gsap.core.Tween | undefined;
     let units = 12; // remplacé par la durée réelle de la timeline
 
     const build = () => {
       showcaseState.step = 0;
       showcaseState.active = false;
+      wipeTween?.kill();
       wipe.p = 0;
       repaintWipe();
+      let footerShown = false;
 
       ctx = gsap.context(() => {
         const tl = gsap.timeline({
@@ -152,10 +153,48 @@ export function ShowcaseLayer() {
             onUpdate: () => {
               const t = tl.time();
               const start = tl.labels.showcase ?? 0;
-              const end = tl.labels.footerEnd ?? tl.duration();
-              const active = t >= start - 0.05 && t <= end + 0.05;
+              const footerAt = tl.labels.footer ?? tl.duration();
+              const active = t >= start - 0.05 && (!footerShown || t < footerAt);
               showcaseState.active = active;
               if (active) showcaseState.invalidate?.();
+
+              if (footer) {
+                const shouldShow = t >= footerAt;
+                if (shouldShow !== footerShown) {
+                  footerShown = shouldShow;
+                  wipeTween?.kill();
+                  if (shouldShow) {
+                    footer.style.visibility = "visible";
+                    footer.style.pointerEvents = "auto";
+                    wipeTween = gsap.to(wipe, {
+                      p: 1,
+                      duration: 1.25,
+                      ease: "power2.inOut",
+                      onUpdate: repaintWipe,
+                      onComplete: () => {
+                        el.style.visibility = "hidden";
+                        showcaseState.active = false;
+                      },
+                    });
+                    gsap.to(".sc-progress", { opacity: 0, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+                  } else {
+                    el.style.visibility = "visible";
+                    footer.style.pointerEvents = "none";
+                    showcaseState.active = true;
+                    showcaseState.invalidate?.();
+                    wipeTween = gsap.to(wipe, {
+                      p: 0,
+                      duration: 0.9,
+                      ease: "power2.inOut",
+                      onUpdate: repaintWipe,
+                      onComplete: () => {
+                        footer.style.visibility = "hidden";
+                      },
+                    });
+                    gsap.to(".sc-progress", { opacity: 1, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+                  }
+                }
+              }
             },
           },
         });
@@ -217,30 +256,11 @@ export function ShowcaseLayer() {
           "showcase"
         );
 
-        // Le footer remplace la section des images, colonne par colonne.
+        // Le footer remplace la section des images, colonne par colonne,
+        // de manière autonome et douce dès qu'un scroll atteint ce seuil.
         if (footer) {
-          const isMobile = isStackedViewport(el.clientWidth, el.clientHeight);
-          const wipeUnits = isMobile ? 0.85 : WIPE_UNITS;
-          const endHold = isMobile ? 0.1 : END_HOLD;
-
           tl.addLabel("footer");
-          tl.set(footer, { visibility: "visible" }, "footer");
-          tl.to(".sc-progress", { opacity: 0, duration: 0.6, ease: "power2.out" }, "footer");
-          tl.to(
-            wipe,
-            {
-              p: 1,
-              duration: wipeUnits,
-              ease: "power1.inOut",
-              onUpdate: repaintWipe,
-            },
-            "footer"
-          );
-
-          // balayage terminé : le footer est cliquable, la scène WebGL n'est plus affichée
-          tl.addLabel("footerEnd", `footer+=${wipeUnits}`);
-          tl.set(footer, { pointerEvents: "auto" }, "footerEnd");
-          tl.set(el, { visibility: "hidden" }, "footerEnd");
+          tl.to({}, { duration: 0.35 }, "footer");
 
           // écran plus court que le footer : il défile dans le cadre, toujours épinglé
           if (slide) {
@@ -253,11 +273,10 @@ export function ShowcaseLayer() {
                   duration: over() / ((el.clientHeight * SCROLL_PER_UNIT) / 100),
                   ease: "none",
                 },
-                "footerEnd"
+                "footer+=0.35"
               );
             }
           }
-          tl.to({}, { duration: endHold });
         }
 
         units = tl.duration();
@@ -276,8 +295,14 @@ export function ShowcaseLayer() {
       window.removeEventListener("resize", place);
       ro.disconnect();
       showcaseState.active = false;
+      wipeTween?.kill();
       ctx?.revert();
-      if (footer) clearMask(footer);
+      el.style.removeProperty("visibility");
+      if (footer) {
+        clearMask(footer);
+        footer.style.removeProperty("visibility");
+        footer.style.removeProperty("pointer-events");
+      }
       if (slide) slide.style.removeProperty("top");
     };
   }, []);
