@@ -4,17 +4,9 @@ import { ShowcaseLayer } from "./ShowcaseLayer";
 import { TransformationGallery } from "@/components/transformation/TransformationGallery";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { resetIntro, introState } from "@/lib/introState";
 import { HERO_BLUR, HERO_DIM } from "@/lib/showcaseState";
 import { RevealText } from "@/components/text/RevealText";
 import { addTextReveal } from "@/lib/textReveal";
-
-import dynamic from "next/dynamic";
-
-const Scene3D = dynamic(
-  () => import("./ClapScene").then((m) => ({ default: m.ClapScene })),
-  { ssr: false }
-);
 
 const COLS = 14;
 const ROWS = 9;
@@ -69,19 +61,12 @@ export function IntroHero() {
   const titleEndRef = useRef<HTMLDivElement>(null);
   const [done, setDone] = useState(false);
   const [run] = useState(0);
-  const [webgl, setWebgl] = useState(false);
   const tiles = useMemo(() => buildTiles(), []);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setWebgl(true);
-  }, []);
 
   useEffect(() => {
     const scope = root.current;
     if (!scope) return;
 
-    resetIntro();
     setDone(false);
 
     const ctx = gsap.context(() => {
@@ -103,7 +88,6 @@ export function IntroHero() {
         },
       });
 
-      tl.to(introState, { scale: 1, duration: 1.15, ease: "back.out(1.5)" }, 0.2);
       tl.to(
         ".glass-tr",
         { clipPath: "inset(0% 0% 0% 0%)", duration: 1.05, ease: "power4.inOut" },
@@ -117,27 +101,12 @@ export function IntroHero() {
       tl.to(".char", { yPercent: 0, stagger: 0.01, duration: 0.65 }, 1.05);
 
       tl.addLabel("clap", 7);
-      tl.to(introState, { open: 0, duration: 0.16, ease: "power4.in" }, "clap")
-        .to(introState, { open: 0.1, duration: 0.07, ease: "power2.out" })
-        .to(introState, { open: 0, duration: 0.08, ease: "power3.in" });
-
-      tl.fromTo(
-        introState,
-        { shake: 1 },
-        { shake: 0, duration: 0.5, ease: "power2.out", immediateRender: false },
-        "clap+=0.16"
-      );
       // immediateRender: false -> le flash ne s'affiche PAS dès le début
       tl.fromTo(
         ".flash",
         { opacity: 0.82 },
         { opacity: 0, duration: 0.42, immediateRender: false },
         "clap+=0.16"
-      );
-      tl.to(
-        introState,
-        { scale: 0, spin: Math.PI * 0.7, duration: 0.7, ease: "back.in(1.5)" },
-        "clap+=0.75"
       );
 
       tl.to(".trait", { opacity: 0.95, duration: 0.18 }, "clap+=1.05");
@@ -154,16 +123,16 @@ export function IntroHero() {
       const after = "clap+=4.15";
       tl.to(
         ".glass-tr",
-        { clipPath: "inset(0% 0% 100% 100%)", duration: 0.85, ease: "power4.inOut" },
+        { clipPath: "inset(0% 0% 100% 100%)", duration: 0.75, ease: "power4.inOut" },
         after
       );
       tl.to(
         ".glass-bl",
-        { clipPath: "inset(100% 100% 0% 0%)", duration: 0.85, ease: "power4.inOut" },
+        { clipPath: "inset(100% 100% 0% 0%)", duration: 0.75, ease: "power4.inOut" },
         after
       );
       tl.to(".trait", { opacity: 0, duration: 0.25 }, after);
-      tl.to(".title-end", { opacity: 1, y: 0, duration: 0.85, ease: "power3.out" }, "-=0.25");
+      tl.to(".title-end", { opacity: 1, y: 0, duration: 0.85, ease: "power3.out" }, `${after}+=0.15`);
       tl.to(".title-end__line", { scaleX: 1, opacity: 1, duration: 0.9, ease: "power3.inOut" }, "<+=0.08");
       addTextReveal(tl, titleEndRef.current, "<+=0.06", {
         duration: 0.85,
@@ -229,11 +198,6 @@ export function IntroHero() {
 
       {/* Trait de lumière (animé par la timeline, style dans globals.css) */}
       <div className="trait" />
-
-      {/* Clap 3D au-dessus du damier. Démonté une fois l'intro finie : libère un contexte WebGL */}
-      <div className="pointer-events-none absolute inset-0 z-10">
-        {webgl && !done && <Scene3D />}
-      </div>
 
       <aside className="glass-panel glass-tr top-3 right-3 w-[min(86vw,290px)] p-4 sm:top-5 sm:right-5 md:top-8 md:right-8 md:w-[min(86vw,320px)] md:p-6">
         <div className="space-y-3">
