@@ -219,6 +219,10 @@ export function ShowcaseLayer() {
 
         // Le footer remplace la section des images, colonne par colonne.
         if (footer) {
+          const isMobile = isStackedViewport(el.clientWidth, el.clientHeight);
+          const wipeUnits = isMobile ? 0.85 : WIPE_UNITS;
+          const endHold = isMobile ? 0.1 : END_HOLD;
+
           tl.addLabel("footer");
           tl.set(footer, { visibility: "visible" }, "footer");
           tl.to(".sc-progress", { opacity: 0, duration: 0.6, ease: "power2.out" }, "footer");
@@ -226,15 +230,15 @@ export function ShowcaseLayer() {
             wipe,
             {
               p: 1,
-              duration: WIPE_UNITS,
-              ease: "none",
+              duration: wipeUnits,
+              ease: "power1.inOut",
               onUpdate: repaintWipe,
             },
             "footer"
           );
 
           // balayage terminé : le footer est cliquable, la scène WebGL n'est plus affichée
-          tl.addLabel("footerEnd", `footer+=${WIPE_UNITS}`);
+          tl.addLabel("footerEnd", `footer+=${wipeUnits}`);
           tl.set(footer, { pointerEvents: "auto" }, "footerEnd");
           tl.set(el, { visibility: "hidden" }, "footerEnd");
 
@@ -253,7 +257,7 @@ export function ShowcaseLayer() {
               );
             }
           }
-          tl.to({}, { duration: END_HOLD });
+          tl.to({}, { duration: endHold });
         }
 
         units = tl.duration();

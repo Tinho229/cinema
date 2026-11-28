@@ -297,14 +297,18 @@
 .cf-contact {
   grid-column: 2;
   grid-row: 2;
-  padding: 24px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
 }
 
 .cf-contact__list {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  margin-top: 18px;
+  justify-content: space-evenly;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .cf-contact__row {
@@ -493,8 +497,8 @@
        mais n'empêche pas l'expansion si le contenu est plus grand. */
     min-height: 100dvh;
     height: auto;
-    padding: 12px;
-    gap: 12px;
+    padding: 10px;
+    gap: 10px;
   }
 
   .cf-visual,
@@ -504,14 +508,14 @@
   }
 
   .cf-right {
-    /* Remplit toute la hauteur disponible sur mobile sans laisser de vide en bas,
-       tout en s'agrandissant si le contenu dépasse sur très petit écran. */
-    min-height: calc(100dvh - 24px);
+    /* Chaque carte garde sa hauteur naturelle ; l'espace restant est réparti
+       entre les blocs pour éviter qu'une carte soit étirée inutilement. */
+    min-height: calc(100dvh - 20px);
     height: auto;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(auto, 1fr) minmax(auto, 1fr) auto;
-    align-content: stretch;
-    gap: 12px;
+    grid-template-rows: auto auto auto;
+    align-content: space-between;
+    gap: 10px;
   }
 
   .cf-opening,
@@ -522,12 +526,12 @@
   }
 
   .cf-opening {
-    padding: 18px 16px;
+    padding: 14px 16px;
   }
 
   .cf-opening__list {
-    gap: 8px;
-    margin-top: 12px;
+    gap: 6px;
+    margin-top: 10px;
   }
 
   .cf-opening__row {
@@ -536,21 +540,23 @@
   }
 
   .cf-card__title {
-    font-size: 20px;
+    font-size: 19px;
   }
 
   .cf-contact {
-    padding: 18px 16px;
+    padding: 14px 16px;
   }
 
   .cf-contact__list {
-    gap: 14px;
-    margin-top: 14px;
+    flex: 0 0 auto;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-top: 10px;
   }
 
   .cf-contact__row {
     grid-template-columns: 74px minmax(0, 1fr);
-    gap: 10px;
+    gap: 8px;
     font-size: 12.5px;
   }
 
@@ -564,11 +570,12 @@
 
   .cf-legal {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 8px;
   }
 
   .cf-legal__cell {
-    min-height: 52px;
+    min-height: 46px;
+    padding: 6px 10px;
     border-radius: 14px;
   }
 }
