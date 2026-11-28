@@ -178,7 +178,7 @@ export function IntroHero() {
   return (
     <section
       ref={root}
-      className="relative h-dvh w-full overflow-hidden bg-black text-[#f4f1ea]"
+      className="hero-section-full relative h-dvh w-full overflow-hidden bg-black text-[#f4f1ea]"
     >
       {/* Image du hero : elle RESTE affichée pendant tout le scroll (plus de fondu
           vers le noir). Quand on arrive sur les images, .hero-soft (la même image,

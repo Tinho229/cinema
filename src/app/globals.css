@@ -24,6 +24,13 @@ body {
   overflow-x: hidden;
 }
 
+/* Empêche GSAP ScrollTrigger (pin) de figer la hauteur à celle mesurée
+   avant le masquage de la barre d'adresse mobile (sinon un vide noir apparaît en bas). */
+.hero-section-full {
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+}
+
 /* =====================================
    INTRODUCTION
 ===================================== */

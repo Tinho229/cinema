@@ -69,11 +69,9 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.14),
-    transparent 24%
-  );
+  background: linear-gradient(to top,
+      rgba(0, 0, 0, 0.14),
+      transparent 24%);
   pointer-events: none;
 }
 
@@ -182,7 +180,7 @@
   border-collapse: collapse;
 }
 
-.cf-opening__table tr + tr td {
+.cf-opening__table tr+tr td {
   border-top: 1px solid rgba(244, 241, 234, 0.1);
 }
 
@@ -506,14 +504,14 @@
   }
 
   .cf-right {
-    /* Pas de min-height fixe : on laisse le contenu determiner la hauteur.
-       align-content: space-evenly distribue l'espace disponible. */
-    min-height: 0;
+    /* Remplit toute la hauteur disponible sur mobile sans laisser de vide en bas,
+       tout en s'agrandissant si le contenu dépasse sur très petit écran. */
+    min-height: calc(100dvh - 24px);
     height: auto;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto auto;
-    align-content: start;
-    gap: 16px;
+    grid-template-rows: minmax(auto, 1fr) minmax(auto, 1fr) auto;
+    align-content: stretch;
+    gap: 12px;
   }
 
   .cf-opening,
