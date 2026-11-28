@@ -187,7 +187,7 @@ export function IntroHero() {
           sur les images. Réglages : HERO_DIM / HERO_BLUR dans lib/showcaseState.ts */}
       <div className="hero-media absolute inset-0">
         <img
-          src="/images/hero.webp"
+          src="/images/hero.jpg"
           alt="Blond"
           className="hero-bg absolute inset-0 h-full w-full object-cover"
         />
@@ -196,7 +196,7 @@ export function IntroHero() {
           aria-hidden="true"
         >
           <img
-            src="/images/hero.webp"
+            src="/images/hero.jpg"
             alt=""
             decoding="async"
             className="absolute inset-0 h-full w-full object-cover"
@@ -276,7 +276,7 @@ export function IntroHero() {
           className="text-xs font-medium text-[#f4f1ea]/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] md:text-[13px]"
         />
         <ul className="mt-2.5 space-y-1.5 md:mt-3 md:space-y-2">
-          {["AGOSSADOU Houefa", "HESSOU Rufin - LAFIA Jacob", "TOFFOHOUSSOU GLORIA" , "AGOÏ Godthanks", "HESSOU Destinol" , "FIDEGNON Séverine" , ].map((name, i) => (
+          {["AGOSSADOU Houefa", "HESSOU Rufin - LAFIA Jacob", "TOFFOHOUSSOU GLORIA", "AGOÏ Godthanks", "HESSOU Destinol", "FIDEGNON Séverine",].map((name, i) => (
             <li key={i}>
               <Line
                 text={name}
@@ -304,7 +304,7 @@ export function IntroHero() {
           />
 
           <p className="tx-display text-[clamp(21px,3.3vw,44px)] leading-[1.2] text-[#f4f1ea] [text-shadow:0_2px_24px_rgba(0,0,0,0.95),0_1px_6px_rgba(0,0,0,0.95)] [@media(max-height:480px)]:text-[clamp(18px,2.8vw,28px)]">
-            <RevealText text="Le 22 décembre, ta fille et toi mérite de voir à quoi ressemble une femme qui ose, qui agit et qui inspire." />
+            <RevealText text="Le 22 décembre, ta fille mérite de voir à quoi ressemble une femme qui ose, qui agit et qui inspire." />
           </p>
 
           <div
