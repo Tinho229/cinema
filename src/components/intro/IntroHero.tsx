@@ -120,7 +120,7 @@ export function IntroHero() {
       );
       tl.to(".char", { yPercent: 0, stagger: 0.01, duration: 0.65 }, 1.05);
 
-      tl.addLabel("clap", 7);
+      tl.addLabel("clap", mobile ? 9 : 7);
       if (!mobile) {
         tl.to(introState, { open: 0, duration: 0.16, ease: "power4.in" }, "clap")
           .to(introState, { open: 0.1, duration: 0.07, ease: "power2.out" })
