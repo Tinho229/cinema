@@ -2,11 +2,19 @@
 import { FooterLayer } from "./FooterLayer";
 import { ShowcaseLayer } from "./ShowcaseLayer";
 import { TransformationGallery } from "@/components/transformation/TransformationGallery";
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
+import { resetIntro, introState } from "@/lib/introState";
+import { isStackedViewport } from "@/lib/showcaseLayout";
 import { HERO_BLUR, HERO_DIM } from "@/lib/showcaseState";
 import { RevealText } from "@/components/text/RevealText";
 import { addTextReveal } from "@/lib/textReveal";
+
+const Scene3D = dynamic(
+  () => import("./ClapScene").then((m) => ({ default: m.ClapScene })),
+  { ssr: false }
+);
 
 const COLS = 14;
 const ROWS = 9;
@@ -61,12 +69,21 @@ export function IntroHero() {
   const titleEndRef = useRef<HTMLDivElement>(null);
   const [done, setDone] = useState(false);
   const [run] = useState(0);
+  const [webgl, setWebgl] = useState(false);
   const tiles = useMemo(() => buildTiles(), []);
+
+  useEffect(() => {
+    const mobile = isStackedViewport(window.innerWidth, window.innerHeight);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (!mobile) setWebgl(true);
+  }, []);
 
   useEffect(() => {
     const scope = root.current;
     if (!scope) return;
 
+    const mobile = isStackedViewport(window.innerWidth, window.innerHeight);
+    if (!mobile) resetIntro();
     setDone(false);
 
     const ctx = gsap.context(() => {
@@ -88,6 +105,9 @@ export function IntroHero() {
         },
       });
 
+      if (!mobile) {
+        tl.to(introState, { scale: 1, duration: 1.15, ease: "back.out(1.5)" }, 0.2);
+      }
       tl.to(
         ".glass-tr",
         { clipPath: "inset(0% 0% 0% 0%)", duration: 1.05, ease: "power4.inOut" },
@@ -101,6 +121,18 @@ export function IntroHero() {
       tl.to(".char", { yPercent: 0, stagger: 0.01, duration: 0.65 }, 1.05);
 
       tl.addLabel("clap", 7);
+      if (!mobile) {
+        tl.to(introState, { open: 0, duration: 0.16, ease: "power4.in" }, "clap")
+          .to(introState, { open: 0.1, duration: 0.07, ease: "power2.out" })
+          .to(introState, { open: 0, duration: 0.08, ease: "power3.in" });
+
+        tl.fromTo(
+          introState,
+          { shake: 1 },
+          { shake: 0, duration: 0.5, ease: "power2.out", immediateRender: false },
+          "clap+=0.16"
+        );
+      }
       // immediateRender: false -> le flash ne s'affiche PAS dès le début
       tl.fromTo(
         ".flash",
@@ -108,6 +140,13 @@ export function IntroHero() {
         { opacity: 0, duration: 0.42, immediateRender: false },
         "clap+=0.16"
       );
+      if (!mobile) {
+        tl.to(
+          introState,
+          { scale: 0, spin: Math.PI * 0.7, duration: 0.7, ease: "back.in(1.5)" },
+          "clap+=0.75"
+        );
+      }
 
       tl.to(".trait", { opacity: 0.95, duration: 0.18 }, "clap+=1.05");
       tl.to(".trait", { scaleX: 0, duration: 2.6, ease: "power2.inOut" }, "clap+=1.12");
@@ -198,6 +237,13 @@ export function IntroHero() {
 
       {/* Trait de lumière (animé par la timeline, style dans globals.css) */}
       <div className="trait" />
+
+      {/* Clap 3D au-dessus du damier (desktop uniquement). Démonté une fois l'intro finie */}
+      {webgl && !done && (
+        <div className="pointer-events-none absolute inset-0 z-10">
+          <Scene3D />
+        </div>
+      )}
 
       <aside className="glass-panel glass-tr top-3 right-3 w-[min(86vw,290px)] p-4 sm:top-5 sm:right-5 md:top-8 md:right-8 md:w-[min(86vw,320px)] md:p-6">
         <div className="space-y-3">
