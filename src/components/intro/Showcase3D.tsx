@@ -17,6 +17,7 @@ import {
   FOCUS,
   LAYOUT,
   N_PROJECTS,
+  isStackedViewport,
   projectAt,
   slotRect,
   transition,
@@ -141,11 +142,25 @@ function Card({ i }: { i: number }) {
     const mt = mat.current;
     if (!m || !mt) return;
     const { zoom, spread, step } = showcaseState;
+    const u = mt.uniforms;
+
+    if (isStackedViewport(size.width, size.height)) {
+      const r = slotRect("image", i, size.width, 1, size.height, step);
+      u.tA.value = textures[i];
+      u.tB.value = textures[i];
+      u.uTa.value.set(...xf[i]);
+      u.uTb.value.set(...xf[i]);
+      u.uT.value = 0;
+      m.position.set(r.x, r.y, 0);
+      m.scale.set(r.w, r.h, 1);
+      u.uOpacity.value = spread;
+      m.visible = u.uOpacity.value > 0.001 && Math.abs(r.x) < size.width;
+      return;
+    }
 
     const { cur, t } = transition(step);
     const a = projectAt(i, cur, 0);
     const b = projectAt(i, cur, 1);
-    const u = mt.uniforms;
     u.tA.value = textures[a];
     u.tB.value = textures[b];
     u.uTa.value.set(...xf[a]);

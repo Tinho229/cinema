@@ -72,14 +72,15 @@ export function blockRect(kind: Kind, W: number, H = 900) {
 
 /** Place et taille (px, origine au centre, y vers le haut) de la carte `index`
     d'un côté. `spread` : 0 = rassemblées vers le centre, 1 = en place. */
-export function slotRect(kind: Kind, index: number, W: number, spread = 1, H = 900) {
+export function slotRect(kind: Kind, index: number, W: number, spread = 1, H = 900, step = 0) {
   const m = metrics(W, H);
   let x: number;
   let y = 0;
   if (m.stacked) {
-    // La carte active (index 0) est centrée ; la suivante amorce la file à droite
-    x = index * m.pitch;
+    // Sur mobile portrait : défilement horizontal simple de la 1re carte jusqu'à la dernière
+    x = (index - step) * m.pitch;
     y = blockRect(kind, W, H).y;
+    return { x, y, w: m.w, h: m.h };
   } else {
     const side = kind === "image" ? -1 : 1;
     x = side * (W * LAYOUT.mid * 0.5 + m.w / 2 + index * m.pitch);

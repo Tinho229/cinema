@@ -15,7 +15,7 @@ import {
   type Texture,
 } from "three";
 import { HERO_DIM, showcaseState } from "@/lib/showcaseState";
-import { N_PROJECTS, projectAt, slotRect, transition } from "@/lib/showcaseLayout";
+import { N_PROJECTS, isStackedViewport, projectAt, slotRect, transition } from "@/lib/showcaseLayout";
 import { PROJECTS, type Note } from "@/lib/showcaseContent";
 import { drawGlassText, GLASS_TEXT_H, GLASS_TEXT_W, loadGlassFonts } from "@/lib/glassText";
 
@@ -294,10 +294,11 @@ export function GlassSlot({ i, project, phase = 0 }: Props) {
     if (!m || !mt) return;
 
     const { spread, bg, step } = showcaseState;
-    m.visible = spread > 0.001;
+    const stacked = isStackedViewport(size.width, size.height);
+    const slot = slotRect("glass", i, size.width, spread, size.height, stacked ? step : 0);
+    m.visible = spread > 0.001 && (!stacked || Math.abs(slot.x) < size.width);
     if (!m.visible) return;
 
-    const slot = slotRect("glass", i, size.width, spread, size.height);
     const pad = slot.h * 0.14;
     m.position.set(slot.x, slot.y, 0);
     m.scale.set(slot.w + pad * 2, slot.h + pad * 2, 1);
@@ -307,13 +308,18 @@ export function GlassSlot({ i, project, phase = 0 }: Props) {
     const bw = (viewRatio > imgRatio ? size.width : size.height * imgRatio) * 1.02;
     const bh = (viewRatio > imgRatio ? size.width / imgRatio : size.height) * 1.02;
 
-    // textes : actuel (A) et suivant (B)
-    const { cur, t } = transition(step);
-
     const u = mt.uniforms;
-    u.tTextA.value = texts[projectAt(project, cur, 0)];
-    u.tTextB.value = texts[projectAt(project, cur, 1)];
-    u.uT.value = t;
+    if (stacked) {
+      u.tTextA.value = texts[project];
+      u.tTextB.value = texts[project];
+      u.uT.value = 0;
+    } else {
+      // textes : actuel (A) et suivant (B)
+      const { cur, t } = transition(step);
+      u.tTextA.value = texts[projectAt(project, cur, 0)];
+      u.tTextB.value = texts[projectAt(project, cur, 1)];
+      u.uT.value = t;
+    }
     u.uBgSize.value.set(bw, bh);
     u.uSize.value.set(slot.w, slot.h);
     u.uPad.value = pad;
@@ -327,7 +333,7 @@ export function GlassSlot({ i, project, phase = 0 }: Props) {
 
     u.uOpacity.value = spread;
     u.uTextAlpha.value = MathUtils.smoothstep(spread, 0.55, 1);
-    u.uTime.value = reduced ? 0 : state.clock.elapsedTime + phase;
+    u.uTime.value = reduced || stacked ? 0 : state.clock.elapsedTime + phase;
   });
 
   return (
