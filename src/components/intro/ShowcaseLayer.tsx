@@ -110,10 +110,10 @@ export function ShowcaseLayer() {
       const set = (k: string, v: number) => el.style.setProperty(k, `${v}px`);
       set("--sc-bx", bl.x);
       set("--sc-bw", bl.w);
-      set("--sc-fbot", H / 2 + bl.y + bl.h / 2 + (stacked ? 48 : 30)); // titre au-dessus des images
+      set("--sc-fbot", H / 2 + bl.y + bl.h / 2 + (stacked ? 20 : 30)); // titre au-dessus des images
       set("--sc-gx", gl.x);
       set("--sc-gw", gl.w);
-      set("--sc-gbot", H / 2 + gl.y + gl.h / 2 + (stacked ? 48 : 30)); // titre au-dessus des verres (Synopsis)
+      set("--sc-gbot", H / 2 + gl.y + gl.h / 2 + (stacked ? 22 : 30)); // titre au-dessus des verres (Synopsis)
 
       // footer plus court que l'écran : centré ; plus long : calé en haut (il défile ensuite)
       if (footer && slide) {
@@ -126,6 +126,8 @@ export function ShowcaseLayer() {
     };
     place();
     window.addEventListener("resize", place);
+    const ro = new ResizeObserver(place);
+    ro.observe(el);
 
     let ctx: gsap.Context | undefined;
     let units = 12; // remplacé par la durée réelle de la timeline
@@ -268,6 +270,7 @@ export function ShowcaseLayer() {
     return () => {
       window.removeEventListener("intro:done", onDone);
       window.removeEventListener("resize", place);
+      ro.disconnect();
       showcaseState.active = false;
       ctx?.revert();
       if (footer) clearMask(footer);

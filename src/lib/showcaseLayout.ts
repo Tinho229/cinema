@@ -39,7 +39,7 @@ function metrics(W: number, H = 900) {
   if (stacked) {
     // Sur mobile portrait : carte large (~86 % largeur) bornée par la hauteur disponible
     // pour loger les titres, la rangée images, la rangée verres et la barre de progression.
-    const maxByHeight = Math.max(170, (H - 130) * 0.42 * CARD_ASPECT);
+    const maxByHeight = Math.max(160, (H - 165) * 0.42 * CARD_ASPECT);
     w = Math.min(W * LAYOUT.wMobile, maxByHeight);
   } else if (W < 1200) {
     // Tablette / petit écran / mobile paysage : agrandit la carte proportionnellement
@@ -54,7 +54,7 @@ function metrics(W: number, H = 900) {
   }
   const h = w / CARD_ASPECT;
   const g = w * LAYOUT.gap;
-  const rowGap = stacked ? Math.min(Math.max(H * 0.085, 58), 76) : 0;
+  const rowGap = stacked ? Math.min(Math.max(H * 0.095, 72), 92) : 0;
   return { stacked, w, h, g, pitch: w + g, rowGap };
 }
 
