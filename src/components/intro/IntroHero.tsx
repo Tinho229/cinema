@@ -187,7 +187,7 @@ export function IntroHero() {
           sur les images. Réglages : HERO_DIM / HERO_BLUR dans lib/showcaseState.ts */}
       <div className="hero-media absolute inset-0">
         <img
-          src="/images/hero.jpg"
+          src="/images/hero.webp"
           alt="Blond"
           className="hero-bg absolute inset-0 h-full w-full object-cover"
         />
@@ -196,7 +196,7 @@ export function IntroHero() {
           aria-hidden="true"
         >
           <img
-            src="/images/hero.jpg"
+            src="/images/hero.webp"
             alt=""
             decoding="async"
             className="absolute inset-0 h-full w-full object-cover"
